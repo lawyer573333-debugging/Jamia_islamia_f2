@@ -1,0 +1,6 @@
+{
+  "name": "Jamia Tul Uloom Al-Islamia - Mirpur AJK",
+  "description": "Official institutional portal for Jamia Tul Uloom Al-Islamia (جامعۃ العلوم الاسلامیہ), Sector F-2, Mirpur, Azad Jammu & Kashmir, Pakistan. Islamic and contemporary education.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

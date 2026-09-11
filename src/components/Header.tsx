@@ -117,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
 
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white group-hover:text-amber-300 transition-colors font-arabic-heading">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white group-hover:text-amber-300 transition-colors font-h1">
                   {t(siteContent.nameUrdu, siteContent.nameEnglish)}
                 </h1>
                 <span className="hidden lg:inline-block px-2 py-0.5 text-[11px] rounded bg-emerald-800 text-emerald-200 border border-emerald-700">

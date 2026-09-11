@@ -60,7 +60,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 <span className="inline-block text-xs uppercase tracking-widest text-amber-400 font-semibold">
                   {t('جامعۃ العلوم الاسلامیہ، سیکٹر ایف-2، میرپور آزاد کشمیر', 'Jamia Tul Uloom Al-Islamia, Sector F-2, Mirpur AJK')}
                 </span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight font-arabic-heading">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight font-h2">
                   {t(siteContent.heroHeadingUrdu, siteContent.heroHeadingEnglish)}
                 </h2>
                 <p className="text-base sm:text-lg text-emerald-100/90 leading-relaxed max-w-2xl">
@@ -410,7 +410,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                     <Bell className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-stone-900 font-arabic-heading">
+                    <h3 className="text-lg font-bold text-stone-900 font-h3">
                       {t('تازہ ترین اعلانات', 'Latest Announcements')}
                     </h3>
                     <span className="text-[11px] text-stone-500">
@@ -471,7 +471,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                     <Calendar className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-stone-900 font-arabic-heading">
+                    <h3 className="text-lg font-bold text-stone-900 font-h3">
                       {t('جامعہ کی سرگرمیاں و تقریبات', 'Recent Activities & Events')}
                     </h3>
                     <span className="text-[11px] text-stone-500">
@@ -581,7 +581,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 <Heart className="w-3.5 h-3.5 text-amber-400" />
                 <span>{t('صدقۂ جاریہ اور دینی تعاون', 'Sadaqah Jariyah & Support')}</span>
               </div>
-              <h3 className="text-2xl sm:text-3xl font-bold text-white font-arabic-heading">
+              <h3 className="text-2xl sm:text-3xl font-bold text-white font-h3">
                 {t('دینی علوم کی ترویج اور مستحق طلبہ کی کفالت میں حصہ لیجیے', 'Support Sacred Scholarship & Deserving Student Welfare')}
               </h3>
               <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">

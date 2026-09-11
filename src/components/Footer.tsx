@@ -43,7 +43,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 <span className="text-[7px] text-stone-300">MIRPUR</span>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white font-arabic-heading">
+                <h3 className="text-lg font-bold text-white font-h3">
                   {t(siteContent.nameUrdu, siteContent.nameEnglish)}
                 </h3>
                 <p className="text-xs text-amber-400/80">

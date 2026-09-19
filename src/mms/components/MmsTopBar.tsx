@@ -43,8 +43,8 @@ export const MmsTopBar: React.FC<MmsTopBarProps> = ({
     parent: { ur: 'سرپرست پورٹل (Parent)', en: 'Parent / Guardian' },
   }[user?.role || 'mudeer'];
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     onNavigateMms('mms_login');
   };
 

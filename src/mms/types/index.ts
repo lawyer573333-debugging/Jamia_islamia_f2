@@ -1,5 +1,21 @@
 export type MmsRole = 'mudeer' | 'teacher' | 'counter' | 'parent';
 
+export interface SupabaseProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  name_urdu?: string | null;
+  role: MmsRole;
+  designation_english?: string | null;
+  designation_urdu?: string | null;
+  department_english?: string | null;
+  department_urdu?: string | null;
+  avatar_url?: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface MmsUser {
   id: string;
   nameUrdu: string;
@@ -11,6 +27,7 @@ export interface MmsUser {
   departmentUrdu?: string;
   departmentEnglish?: string;
   avatarUrl?: string;
+  isActive?: boolean;
 }
 
 export interface MmsNavItem {

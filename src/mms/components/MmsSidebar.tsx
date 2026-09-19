@@ -219,8 +219,8 @@ export const MmsSidebar: React.FC<MmsSidebarProps> = ({
             </div>
 
             <button
-              onClick={() => {
-                logout();
+              onClick={async () => {
+                await logout();
                 onNavigate('mms_login');
               }}
               className="p-1.5 rounded-lg text-emerald-300 hover:text-rose-300 hover:bg-emerald-800 transition-colors shrink-0"

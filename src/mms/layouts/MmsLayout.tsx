@@ -39,21 +39,21 @@ export const MmsLayout: React.FC<MmsLayoutProps> = ({
           onNavigateMms={onNavigateMms}
         />
 
-        {/* Demo Notice Banner */}
-        <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 sm:px-6 py-2 flex items-center justify-between gap-3 text-xs text-amber-900">
+        {/* Phase 2 Supabase Status Banner */}
+        <div className="bg-emerald-950/5 border-b border-emerald-900/10 px-4 sm:px-6 py-2 flex items-center justify-between gap-3 text-xs text-emerald-950">
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded font-bold bg-amber-400 text-stone-950 text-[10px] uppercase">
-              Phase 1
+            <span className="px-2 py-0.5 rounded font-bold bg-emerald-800 text-white text-[10px] uppercase tracking-wider">
+              Phase 2 Active
             </span>
-            <span className="font-medium">
+            <span className="font-medium text-emerald-900">
               {t(
-                'مدارس مینجمنٹ سسٹم (MMS) — ابتدائی ماڈل (Mock Demo Mode)۔ حقیقی ڈیٹا بیس یا سپابیس منسلک نہیں ہے۔',
-                'Madaris Management System (MMS) — Phase 1 Mock Demo Mode. No live database or Supabase connected.'
+                'مدارس مینجمنٹ سسٹم — فیز ۲: سپابیس اتھنٹیکیشن، یوزر پروفائلز، اور رو لیول سیکیورٹی (RLS) فعال ہے۔',
+                'Madaris Management System — Phase 2: Supabase Auth, User Profiles, and Row Level Security (RLS) Active.'
               )}
             </span>
           </div>
-          <span className="hidden md:inline text-[11px] text-amber-800 font-semibold">
-            {t('جامعۃ العلوم الاسلامیہ میرپور', 'Jamia Tul Uloom Mirpur AJK')}
+          <span className="hidden md:inline text-[11px] text-emerald-800 font-semibold font-mono">
+            Jamia Tul Uloom MMS
           </span>
         </div>
 

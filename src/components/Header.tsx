@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Phone, MapPin, Clock, Globe, Menu, X, ChevronDown, GraduationCap, Heart, FileText } from 'lucide-react';
+import { Phone, MapPin, Clock, Globe, Menu, X, ChevronDown, GraduationCap, Heart, FileText, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { navigationItems, topBarContent } from '../data/navigation';
 import { siteContent } from '../data/siteContent';
@@ -70,6 +70,16 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
             >
               <Heart className="w-3 h-3 text-amber-400" />
               <span>{t('تعاون و عطیات', 'Donations')}</span>
+            </button>
+
+            {/* MMS Portal Login Button (Discreet) */}
+            <button
+              onClick={() => handleNavClick('mms_login')}
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-emerald-900/90 hover:bg-emerald-800 text-emerald-200 hover:text-amber-300 text-xs font-medium border border-emerald-700/60 transition-colors"
+              title={t('مدرسہ پورٹل میں لاگ ان کریں', 'Portal Login (Madaris Management System)')}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+              <span>{t('مدرسہ پورٹل', 'Portal Login')}</span>
             </button>
 
             {/* Language Switcher Pill */}
@@ -292,6 +302,13 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
               className="w-full py-2 rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-800 font-medium text-sm text-center"
             >
               {t('عطیات و مالی تعاون', 'Donations & Support')}
+            </button>
+            <button
+              onClick={() => handleNavClick('mms_login')}
+              className="w-full py-2 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-amber-300 font-semibold text-xs text-center border border-emerald-800 flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+              <span>{t('مدرسہ پورٹل (Portal Login)', 'Portal Login (MMS)')}</span>
             </button>
           </div>
         </div>

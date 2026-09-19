@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LanguageProvider } from './context/LanguageContext';
+import { MmsAuthProvider } from './mms/context/MmsAuthContext';
+import { MmsApp } from './mms/MmsApp';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 
@@ -82,15 +84,23 @@ export default function App() {
     }
   };
 
+  const isMmsRoute = currentView.startsWith('mms_');
+
   return (
     <LanguageProvider>
-      <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900 antialiased selection:bg-amber-200 selection:text-stone-900">
-        <Header currentView={currentView} onNavigate={handleNavigate} />
-        <main className="flex-1">
-          {renderView()}
-        </main>
-        <Footer onNavigate={handleNavigate} />
-      </div>
+      <MmsAuthProvider>
+        {isMmsRoute ? (
+          <MmsApp currentView={currentView} onNavigate={handleNavigate} />
+        ) : (
+          <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900 antialiased selection:bg-amber-200 selection:text-stone-900">
+            <Header currentView={currentView} onNavigate={handleNavigate} />
+            <main className="flex-1">
+              {renderView()}
+            </main>
+            <Footer onNavigate={handleNavigate} />
+          </div>
+        )}
+      </MmsAuthProvider>
     </LanguageProvider>
   );
 }

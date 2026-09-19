@@ -110,9 +110,16 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
             className="flex items-center gap-3 cursor-pointer group"
           >
             {/* Logo Emblem Placeholder */}
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-stone-950 border-2 border-amber-400 flex flex-col items-center justify-center text-center p-1 shrink-0 shadow-md group-hover:border-amber-300 transition-colors">
-              <span className="text-[9px] text-amber-300 font-bold leading-tight uppercase font-mono">جامعہ</span>
-              <span className="text-[8px] text-stone-300 leading-none">MIRPUR</span>
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-stone-950 border-2 border-amber-400 flex flex-col items-center justify-center text-center p-0.5 shrink-0 shadow-md group-hover:border-amber-300 transition-colors overflow-hidden">
+              <img
+                src="/gallery/photo-01.png"
+                alt="Jamia Emblem"
+                className="w-full h-full object-cover rounded-full"
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = 'none';
+                }}
+              />
+              <span className="text-[9px] text-amber-300 font-bold leading-tight uppercase font-mono hidden">جامعہ</span>
             </div>
 
             <div>

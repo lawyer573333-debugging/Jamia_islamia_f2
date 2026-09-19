@@ -95,10 +95,11 @@ export const ContemporaryEducationView: React.FC<ContemporaryEducationViewProps>
           <div className="bg-white p-3 rounded-2xl border border-stone-200 shadow-md">
             <ImagePlaceholder
               category="departments"
-              suggestedPath="public/images/departments/contemporary.jpg"
+              suggestedPath="public/departments/contemporary.jpg"
               recommendedResolution="1200x800 px"
               title={t('شعبۂ عصری تعلیم - اسکول کلاس روم', 'Contemporary Classroom')}
               heightClass="h-64 sm:h-72"
+              actualSrc="/departments/contemporary.jpg"
             />
           </div>
         </div>
@@ -200,10 +201,11 @@ export const ContemporaryEducationView: React.FC<ContemporaryEducationViewProps>
           <div className="lg:col-span-5">
             <ImagePlaceholder
               category="departments"
-              suggestedPath="public/images/departments/computer-lab.jpg"
+              suggestedPath="public/departments/computer-lab.jpg"
               recommendedResolution="1200x800 px"
               title={t('کمپیوٹر لیب کی جھلک', 'Computer Lab Infrastructure')}
               heightClass="h-60"
+              actualSrc="/departments/computer-lab.jpg"
             />
           </div>
         </div>

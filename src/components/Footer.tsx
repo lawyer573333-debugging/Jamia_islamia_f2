@@ -38,9 +38,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Column 1: Institution Identity */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-emerald-900 border border-amber-400/50 flex flex-col items-center justify-center text-center p-1 shrink-0">
-                <span className="text-[8px] text-amber-300 font-bold uppercase font-mono">جامعہ</span>
-                <span className="text-[7px] text-stone-300">MIRPUR</span>
+              <div className="w-10 h-10 rounded-full bg-emerald-900 border border-amber-400/50 flex flex-col items-center justify-center text-center p-0.5 shrink-0 overflow-hidden">
+                <img
+                  src="/gallery/photo-01.png"
+                  alt="Jamia Emblem"
+                  className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLElement).style.display = 'none';
+                  }}
+                />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white font-h3">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Landmark, Users, BookOpen, GraduationCap, Calendar, Image as ImageIcon, Laptop } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { ImagePlaceholder as ImagePlaceholderType } from '../types';
@@ -27,6 +27,7 @@ export const ImagePlaceholder: React.FC<ImagePlaceholderProps> = ({
   actualSrc,
 }) => {
   const { language, t } = useLanguage();
+  const [hasError, setHasError] = useState(false);
 
   const getCategoryIcon = () => {
     switch (category) {
@@ -48,16 +49,25 @@ export const ImagePlaceholder: React.FC<ImagePlaceholderProps> = ({
 
   const Icon = getCategoryIcon();
   const displayTitle = title || (placeholder ? (language === 'ur' ? placeholder.title.ur : placeholder.title.en) : '');
+  const candidateSrc = actualSrc || (placeholder?.hasRealImage && placeholder?.realImageUrl ? placeholder.realImageUrl : undefined);
 
-  if (actualSrc) {
+  if (candidateSrc && !hasError) {
     return (
-      <img
-        src={actualSrc}
-        alt={displayTitle || 'Jamia Tul Uloom Al-Islamia'}
-        className={`w-full h-full object-cover rounded-lg ${className}`}
-        referrerPolicy="no-referrer"
-        loading="lazy"
-      />
+      <div className={`relative w-full ${heightClass} overflow-hidden rounded-xl bg-stone-900 group shadow-xs`}>
+        <img
+          src={candidateSrc}
+          alt={displayTitle || 'Jamia Tul Uloom Al-Islamia'}
+          className={`w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-105 ${className}`}
+          referrerPolicy="no-referrer"
+          loading="lazy"
+          onError={() => setHasError(true)}
+        />
+        {/* Subtle institutional verified indicator */}
+        <div className="absolute top-2.5 right-2.5 z-10 px-2 py-0.5 rounded bg-emerald-950/80 backdrop-blur-xs border border-emerald-500/40 text-[10px] font-semibold text-emerald-300 flex items-center gap-1 shadow-sm select-none">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span>{language === 'ur' ? 'تصدیق شدہ تصویر' : 'Official Photo'}</span>
+        </div>
+      </div>
     );
   }
 

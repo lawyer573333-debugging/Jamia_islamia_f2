@@ -97,59 +97,89 @@ export const SetupGuideView: React.FC<SetupGuideViewProps> = ({ onNavigate }) =>
             <thead className="bg-stone-50 border-b border-stone-200 text-stone-600 font-semibold">
               <tr>
                 <th className="p-3 text-start">{t('شعبہ / تصویر', 'Category / Subject')}</th>
-                <th className="p-3 text-start">{t('فائل کا راستہ (File Path in public/)', 'Target File Path')}</th>
+                <th className="p-3 text-start">{t('فائل کا راستہ (Target File Path)', 'Target File Path')}</th>
                 <th className="p-3 text-start">{t('تجویز کردہ سائز', 'Recommended Resolution')}</th>
+                <th className="p-3 text-start">{t('حیثیت (Integration Status)', 'Integration Status')}</th>
                 <th className="p-3 text-start">{t('مربوط ڈیٹا فائل', 'Associated Data File')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100 font-mono text-xs">
               <tr className="hover:bg-stone-50">
-                <td className="p-3 font-sans font-medium text-stone-900">{t('مرکزی بینر (Hero Banner)', 'Main Hero Banner')}</td>
-                <td className="p-3 text-emerald-800">public/images/hero/main-campus.jpg</td>
+                <td className="p-3 font-sans font-medium text-stone-900">{t('مرکزی بینر (Hero Campus Façade)', 'Main Hero Campus Façade')}</td>
+                <td className="p-3 text-emerald-800">public/images/campus/hero.jpg</td>
                 <td className="p-3 text-stone-600">1920x1080 px (16:9)</td>
+                <td className="p-3 font-sans"><span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[11px]">{t('مربوط و تصدیق شدہ', 'Active & Integrated')}</span></td>
                 <td className="p-3 text-stone-500 font-sans">src/data/siteContent.ts</td>
               </tr>
               <tr className="hover:bg-stone-50">
-                <td className="p-3 font-sans font-medium text-stone-900">{t('جامعہ عمارت (Exterior)', 'Campus Exterior')}</td>
-                <td className="p-3 text-emerald-800">public/images/campus/exterior.jpg</td>
+                <td className="p-3 font-sans font-medium text-stone-900">{t('جامعہ مسجد و ہال (Mosque & Interior)', 'Mosque & Interior Hall')}</td>
+                <td className="p-3 text-emerald-800">public/hero/main-interior.jpg</td>
                 <td className="p-3 text-stone-600">1200x800 px (3:2)</td>
+                <td className="p-3 font-sans"><span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[11px]">{t('مربوط و تصدیق شدہ', 'Active & Integrated')}</span></td>
                 <td className="p-3 text-stone-500 font-sans">src/data/siteContent.ts</td>
               </tr>
               <tr className="hover:bg-stone-50">
-                <td className="p-3 font-sans font-medium text-stone-900">{t('درسِ نظامی کلاس روم', 'Dars-e-Nizami Class')}</td>
-                <td className="p-3 text-emerald-800">public/images/departments/dars-e-nizami.jpg</td>
-                <td className="p-3 text-stone-600">1200x800 px (3:2)</td>
-                <td className="p-3 text-stone-500 font-sans">src/data/departments.ts</td>
-              </tr>
-              <tr className="hover:bg-stone-50">
-                <td className="p-3 font-sans font-medium text-stone-900">{t('شعبۂ تحفیظ القرآن', 'Tahfeez-ul-Quran Circle')}</td>
-                <td className="p-3 text-emerald-800">public/images/departments/hifz.jpg</td>
-                <td className="p-3 text-stone-600">1200x800 px (3:2)</td>
-                <td className="p-3 text-stone-500 font-sans">src/data/departments.ts</td>
+                <td className="p-3 font-sans font-medium text-stone-900">{t('جامعہ مونوگرام (Seal & Monogram)', 'Official Monogram Emblem')}</td>
+                <td className="p-3 text-emerald-800">public/gallery/photo-01.png</td>
+                <td className="p-3 text-stone-600">512x512 px (1:1)</td>
+                <td className="p-3 font-sans"><span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[11px]">{t('مربوط و تصدیق شدہ', 'Active & Integrated')}</span></td>
+                <td className="p-3 text-stone-500 font-sans">src/components/Header.tsx</td>
               </tr>
               <tr className="hover:bg-stone-50">
                 <td className="p-3 font-sans font-medium text-stone-900">{t('عصری اسکول و کالج کلاس', 'Contemporary Classroom')}</td>
-                <td className="p-3 text-emerald-800">public/images/departments/contemporary.jpg</td>
+                <td className="p-3 text-emerald-800">public/departments/contemporary.jpg</td>
                 <td className="p-3 text-stone-600">1200x800 px (3:2)</td>
+                <td className="p-3 font-sans"><span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[11px]">{t('مربوط و تصدیق شدہ', 'Active & Integrated')}</span></td>
                 <td className="p-3 text-stone-500 font-sans">src/data/departments.ts</td>
               </tr>
               <tr className="hover:bg-stone-50">
                 <td className="p-3 font-sans font-medium text-stone-900">{t('کمپیوٹر لیب', 'Computer Laboratory')}</td>
-                <td className="p-3 text-emerald-800">public/images/departments/computer-lab.jpg</td>
+                <td className="p-3 text-emerald-800">public/departments/computer-lab.jpg</td>
                 <td className="p-3 text-stone-600">1200x800 px (3:2)</td>
+                <td className="p-3 font-sans"><span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[11px]">{t('مربوط و تصدیق شدہ', 'Active & Integrated')}</span></td>
                 <td className="p-3 text-stone-500 font-sans">src/data/departments.ts</td>
               </tr>
               <tr className="hover:bg-stone-50">
                 <td className="p-3 font-sans font-medium text-stone-900">{t('تصویرِ مہتمم صاحب', 'Muhtamim Portrait')}</td>
-                <td className="p-3 text-emerald-800">public/images/leadership/muhtamim.jpg</td>
-                <td className="p-3 text-stone-600">600x750 px (4:5)</td>
+                <td className="p-3 text-emerald-800">public/leadership/muhtamim.jpg</td>
+                <td className="p-3 text-stone-600">800x1000 px (4:5)</td>
+                <td className="p-3 font-sans"><span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[11px]">{t('مربوط و تصدیق شدہ', 'Active & Integrated')}</span></td>
                 <td className="p-3 text-stone-500 font-sans">src/data/faculty.ts</td>
               </tr>
               <tr className="hover:bg-stone-50">
                 <td className="p-3 font-sans font-medium text-stone-900">{t('تصویرِ ناظمِ اعلیٰ صاحب', 'Nazim-e-Aala Portrait')}</td>
-                <td className="p-3 text-emerald-800">public/images/leadership/nazim-e-aala.jpg</td>
-                <td className="p-3 text-stone-600">600x750 px (4:5)</td>
+                <td className="p-3 text-emerald-800">public/leadership/nazim-e-aala.jpg</td>
+                <td className="p-3 text-stone-600">800x1000 px (4:5)</td>
+                <td className="p-3 font-sans"><span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[11px]">{t('مربوط و تصدیق شدہ', 'Active & Integrated')}</span></td>
                 <td className="p-3 text-stone-500 font-sans">src/data/faculty.ts</td>
+              </tr>
+              <tr className="hover:bg-stone-50">
+                <td className="p-3 font-sans font-medium text-stone-900">{t('تقریبِ ختمِ بخاری', 'Khatm-e-Bukhari Convocation')}</td>
+                <td className="p-3 text-emerald-800">public/events/bukhari-khatm.jpg</td>
+                <td className="p-3 text-stone-600">1200x800 px (16:9)</td>
+                <td className="p-3 font-sans"><span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[11px]">{t('مربوط و تصدیق شدہ', 'Active & Integrated')}</span></td>
+                <td className="p-3 text-stone-500 font-sans">src/data/events.ts</td>
+              </tr>
+              <tr className="hover:bg-stone-50">
+                <td className="p-3 font-sans font-medium text-stone-900">{t('گیلری تصویری مجموعہ (8 تصاویر)', 'Photo Gallery (8 Real Photos)')}</td>
+                <td className="p-3 text-emerald-800">public/gallery/photo-01..09</td>
+                <td className="p-3 text-stone-600">مختلف سائز (HQ)</td>
+                <td className="p-3 font-sans"><span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[11px]">{t('مربوط و تصدیق شدہ', 'Active & Integrated')}</span></td>
+                <td className="p-3 text-stone-500 font-sans">src/data/gallery.ts</td>
+              </tr>
+              <tr className="hover:bg-stone-50">
+                <td className="p-3 font-sans font-medium text-stone-900">{t('درسِ نظامی کلاس روم', 'Dars-e-Nizami Class')}</td>
+                <td className="p-3 text-stone-600">public/images/departments/dars-e-nizami.jpg</td>
+                <td className="p-3 text-stone-600">1200x800 px (3:2)</td>
+                <td className="p-3 font-sans"><span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-medium text-[11px]">{t('پلیس ہولڈر (تصویر زیرِ انتظار)', 'Pending Image')}</span></td>
+                <td className="p-3 text-stone-500 font-sans">src/data/departments.ts</td>
+              </tr>
+              <tr className="hover:bg-stone-50">
+                <td className="p-3 font-sans font-medium text-stone-900">{t('شعبۂ تحفیظ القرآن', 'Tahfeez-ul-Quran Circle')}</td>
+                <td className="p-3 text-stone-600">public/images/departments/hifz.jpg</td>
+                <td className="p-3 text-stone-600">1200x800 px (3:2)</td>
+                <td className="p-3 font-sans"><span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-medium text-[11px]">{t('پلیس ہولڈر (تصویر زیرِ انتظار)', 'Pending Image')}</span></td>
+                <td className="p-3 text-stone-500 font-sans">src/data/departments.ts</td>
               </tr>
             </tbody>
           </table>

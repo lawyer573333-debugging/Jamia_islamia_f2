@@ -84,6 +84,7 @@ export const GalleryView: React.FC<GalleryViewProps> = ({ onNavigate }) => {
                 suggestedPath={item.suggestedFilePath}
                 recommendedResolution="1200x800 px"
                 heightClass="h-52"
+                actualSrc={item.hasRealImage ? item.realImageUrl : undefined}
               />
               <div className="p-4 space-y-2">
                 <div className="flex items-center justify-between">
@@ -139,6 +140,7 @@ export const GalleryView: React.FC<GalleryViewProps> = ({ onNavigate }) => {
                 suggestedPath={activeModalItem.suggestedFilePath}
                 recommendedResolution="1200x800 px (Landscape)"
                 heightClass="h-64 sm:h-72"
+                actualSrc={activeModalItem.hasRealImage ? activeModalItem.realImageUrl : undefined}
               />
 
               <div className="space-y-2">

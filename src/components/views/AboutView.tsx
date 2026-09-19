@@ -59,10 +59,11 @@ export const AboutView: React.FC<AboutViewProps> = ({ onNavigate }) => {
           <div className="bg-white p-3 rounded-2xl border border-stone-200 shadow-md">
             <ImagePlaceholder
               category="campus"
-              suggestedPath="public/images/campus/exterior.jpg"
+              suggestedPath="public/images/campus/hero.jpg"
               recommendedResolution="1200x800 px"
               title={t('جامعہ کی بیرونی عمارت کا منظر', 'Jamia Campus Façade')}
               heightClass="h-72"
+              actualSrc="/images/campus/hero.jpg"
             />
           </div>
         </div>

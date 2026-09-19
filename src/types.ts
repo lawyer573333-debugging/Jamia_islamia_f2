@@ -16,6 +16,8 @@ export interface ImagePlaceholder {
   aspectRatio: string;
   isPlaceholder: boolean;
   status: ContentStatus;
+  hasRealImage?: boolean;
+  realImageUrl?: string;
 }
 
 export interface Department {
@@ -133,6 +135,8 @@ export interface GalleryItem {
   dateAdded: string;
   suggestedFilePath: string;
   status: ContentStatus;
+  hasRealImage?: boolean;
+  realImageUrl?: string;
 }
 
 export interface MediaItem {

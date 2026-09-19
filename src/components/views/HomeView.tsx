@@ -116,10 +116,12 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                   recommendedResolution="1920x1080 px (Landscape)"
                   title={t('جامعۃ العلوم الاسلامیہ - مرکزی کیمپس و بلڈنگ', 'Main Campus Façade & Mosque')}
                   heightClass="h-72 sm:h-80"
+                  actualSrc="/images/campus/hero.jpg"
                 />
-                <div className="p-3 bg-stone-950/80 rounded-xl mt-2 border border-stone-800 text-center">
-                  <span className="text-xs text-amber-300 font-medium">
-                    {t(siteContent.heroPlaceholderNoticeUrdu, siteContent.heroPlaceholderNoticeEnglish)}
+                <div className="p-2.5 bg-stone-950/80 rounded-xl mt-2 border border-emerald-800/60 text-center flex items-center justify-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span className="text-xs text-emerald-200 font-medium">
+                    {t('جامعۃ العلوم الاسلامیہ میرپور - مرکزی کیمپس کی تصویری جھلک', 'Jamia Tul Uloom Al-Islamia, Mirpur - Official Campus View')}
                   </span>
                 </div>
               </div>
@@ -246,10 +248,11 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
               <div className="bg-white p-3 rounded-2xl border border-stone-200 shadow-md">
                 <ImagePlaceholder
                   category="campus"
-                  suggestedPath="public/images/campus/exterior.jpg"
+                  suggestedPath="public/hero/main-interior.jpg"
                   recommendedResolution="1200x800 px"
-                  title={t('جامعہ بلڈنگ منظر', 'Jamia Campus Exterior')}
+                  title={t('جامعہ مسجد و مرکزی ہال', 'Jamia Mosque & Interior Hall')}
                   heightClass="h-64 sm:h-72"
+                  actualSrc="/hero/main-interior.jpg"
                 />
               </div>
             </div>
@@ -345,10 +348,11 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
               <div className="bg-stone-900/80 p-3 rounded-2xl border border-amber-400/40 shadow-xl">
                 <ImagePlaceholder
                   category="leadership"
-                  suggestedPath="public/images/leadership/muhtamim.jpg"
+                  suggestedPath="public/leadership/muhtamim.jpg"
                   recommendedResolution="800x1000 px"
                   title={t('مولانا زید بوستان صاحب (حفظہ اللہ)', 'Maulana Zaid Bostan (Muhtamim)')}
                   heightClass="h-72"
+                  actualSrc="/leadership/muhtamim.jpg"
                 />
                 <div className="mt-3 text-center">
                   <h4 className="text-base font-bold text-amber-300">
@@ -558,6 +562,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
                 suggestedPath={item.suggestedFilePath}
                 recommendedResolution="1200x800 px"
                 heightClass="h-48"
+                actualSrc={item.hasRealImage ? item.realImageUrl : undefined}
               />
               <div className="p-4">
                 <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">

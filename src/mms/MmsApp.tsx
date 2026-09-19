@@ -6,6 +6,13 @@ import { MmsMudeerDashboard } from './views/MmsMudeerDashboard';
 import { MmsTeacherDashboard } from './views/MmsTeacherDashboard';
 import { MmsCounterDashboard } from './views/MmsCounterDashboard';
 import { MmsParentDashboard } from './views/MmsParentDashboard';
+import { MmsStudentsView } from './views/MmsStudentsView';
+import { MmsGuardiansView } from './views/MmsGuardiansView';
+import { MmsTeachersView } from './views/MmsTeachersView';
+import { MmsClassesView } from './views/MmsClassesView';
+import { MmsSubjectsView } from './views/MmsSubjectsView';
+import { MmsClassSubjectsView } from './views/MmsClassSubjectsView';
+import { MmsEnrollmentsView } from './views/MmsEnrollmentsView';
 import { MmsPlaceholderView } from './views/MmsPlaceholderView';
 import { MmsRole } from './types';
 import { ShieldAlert, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -151,11 +158,32 @@ export const MmsApp: React.FC<MmsAppProps> = ({ currentView, onNavigate }) => {
     switch (currentView) {
       case 'mms_dashboard':
         return <MmsMudeerDashboard onNavigateMms={onNavigate} />;
+      case 'mms_students':
+        return <MmsStudentsView onNavigateMms={onNavigate} />;
+      case 'mms_guardians':
+        return <MmsGuardiansView onNavigateMms={onNavigate} />;
+      case 'mms_teachers':
+        return <MmsTeachersView onNavigateMms={onNavigate} />;
+      case 'mms_classes':
+        return <MmsClassesView onNavigateMms={onNavigate} />;
+      case 'mms_subjects':
+        return <MmsSubjectsView onNavigateMms={onNavigate} />;
+      case 'mms_class_subjects':
+        return <MmsClassSubjectsView onNavigateMms={onNavigate} />;
+      case 'mms_enrollments':
+        return <MmsEnrollmentsView onNavigateMms={onNavigate} />;
       case 'mms_teacher':
+      case 'mms_teacher_classes':
+      case 'mms_teacher_students':
+      case 'mms_teacher_subjects':
         return <MmsTeacherDashboard onNavigateMms={onNavigate} />;
       case 'mms_counter':
+      case 'mms_counter_students':
+      case 'mms_counter_classes':
         return <MmsCounterDashboard onNavigateMms={onNavigate} />;
       case 'mms_parent':
+      case 'mms_parent_children':
+      case 'mms_parent_enrollment':
         return <MmsParentDashboard onNavigateMms={onNavigate} />;
       default:
         return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users,
   GraduationCap,
@@ -16,11 +16,16 @@ import {
   ArrowUpRight,
   ShieldCheck,
   FileSpreadsheet,
+  BookOpen,
+  BookmarkCheck,
+  Shield,
+  Layers,
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { MmsStatCard } from '../components/MmsStatCard';
 import { MmsModal } from '../components/MmsModal';
 import { MUDEER_DASHBOARD_DATA } from '../data/mockData';
+import { phase3Service } from '../services/phase3DataService';
 
 interface MmsMudeerDashboardProps {
   onNavigateMms: (route: string) => void;
@@ -32,6 +37,28 @@ export const MmsMudeerDashboard: React.FC<MmsMudeerDashboardProps> = ({ onNaviga
   const [quickModalOpen, setQuickModalOpen] = useState(false);
   const [modalAction, setModalAction] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Phase 3 Live Counts
+  const [phase3Counts, setPhase3Counts] = useState({
+    students: 0,
+    guardians: 0,
+    teachers: 0,
+    classes: 0,
+    subjects: 0,
+    activeEnrollments: 0,
+  });
+
+  useEffect(() => {
+    const loadCounts = async () => {
+      try {
+        const counts = await phase3Service.getDashboardCounts();
+        setPhase3Counts(counts);
+      } catch (err) {
+        console.error('Failed to load Phase 3 counts:', err);
+      }
+    };
+    loadCounts();
+  }, []);
 
   const kpis = MUDEER_DASHBOARD_DATA.kpis;
 
@@ -50,13 +77,13 @@ export const MmsMudeerDashboard: React.FC<MmsMudeerDashboardProps> = ({ onNaviga
               {t('مہتمم / ناظمِ اعلیٰ ڈیش بورڈ', 'Director & Muhtamim Dashboard')}
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
-              {t('مرکزی انتظامیہ', 'Central Admin')}
+              {t('فیز ۳ — افراد و تعلیمی بنیاد', 'Phase 3: People & Academics')}
             </span>
           </div>
           <p className="text-xs text-stone-500 mt-1">
             {t(
-              'جامعۃ العلوم الاسلامیہ کے تمام شعبہ جات، حاضری، مالیات، اور دار الاقامہ کا مجموعی جائزہ۔',
-              'Institutional overview across all departments, attendance, financials, and hostel.'
+              'طلباء، سرپرست، اساتذہ، کلاسز، نصاب اور داخلوں کا باضابطہ مرکزی کنٹرول روم۔',
+              'Central management console for students, guardians, faculty, classes, curriculum, and enrollments.'
             )}
           </p>
         </div>
@@ -64,20 +91,153 @@ export const MmsMudeerDashboard: React.FC<MmsMudeerDashboardProps> = ({ onNaviga
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={() => handleOpenActionModal(t('نئے داخلہ کی منظوری', 'Approve New Admission'))}
+            onClick={() => onNavigateMms('mms_students')}
             className="px-3.5 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-xs"
           >
             <PlusCircle className="w-4 h-4 text-amber-300" />
-            <span>{t('نیا داخلہ / ایڈمشن', 'New Admission')}</span>
+            <span>{t('نیا داخلہ / طلباء', 'Students Module')}</span>
           </button>
 
           <button
-            onClick={() => handleOpenActionModal(t('ماہانہ مالیاتی رپورٹ ڈاؤنلوڈ', 'Download Monthly Report'))}
+            onClick={() => onNavigateMms('mms_enrollments')}
             className="px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition-colors border border-stone-200 flex items-center gap-1.5"
           >
-            <Download className="w-4 h-4 text-stone-500" />
-            <span>{t('ایکسپورٹ رپورٹ', 'Export Report')}</span>
+            <FileSpreadsheet className="w-4 h-4 text-emerald-800" />
+            <span>{t('داخلہ و اندراج', 'Enrollments')}</span>
           </button>
+        </div>
+      </div>
+
+      {/* PHASE 3 MANDATORY SIMPLE COUNTS (Students, Guardians, Teachers, Classes, Subjects, Active Enrollments) */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold text-stone-900 font-h2 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+            <span>{t('فیز ۳ بنیادی شمار (Phase 3 Core Counts)', 'Phase 3 Core Metrics')}</span>
+          </h2>
+          <span className="text-xs text-stone-400 font-mono">{t('براہِ راست ڈیٹا بیس سے', 'Live Database Sync')}</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {/* 1. Students Count */}
+          <div
+            onClick={() => onNavigateMms('mms_students')}
+            className="bg-white p-4 rounded-2xl border border-stone-200 hover:border-emerald-500 hover:shadow-xs cursor-pointer transition-all group"
+          >
+            <div className="flex items-center justify-between text-stone-400 mb-2">
+              <span className="text-xs font-semibold group-hover:text-emerald-800 transition-colors">
+                {t('طلباء', 'Students')}
+              </span>
+              <Users className="w-4 h-4 text-emerald-700" />
+            </div>
+            <div className="text-2xl font-bold font-mono text-stone-900 group-hover:text-emerald-800 transition-colors">
+              {phase3Counts.students}
+            </div>
+            <div className="text-[10px] text-stone-400 mt-1 flex items-center gap-1">
+              <span>{t('کل رجسٹرڈ طلباء', 'Total Students')}</span>
+              <ArrowUpRight className="w-3 h-3 text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </div>
+
+          {/* 2. Guardians Count */}
+          <div
+            onClick={() => onNavigateMms('mms_guardians')}
+            className="bg-white p-4 rounded-2xl border border-stone-200 hover:border-amber-500 hover:shadow-xs cursor-pointer transition-all group"
+          >
+            <div className="flex items-center justify-between text-stone-400 mb-2">
+              <span className="text-xs font-semibold group-hover:text-amber-800 transition-colors">
+                {t('سرپرست / اولیاء', 'Guardians')}
+              </span>
+              <Shield className="w-4 h-4 text-amber-600" />
+            </div>
+            <div className="text-2xl font-bold font-mono text-stone-900 group-hover:text-amber-800 transition-colors">
+              {phase3Counts.guardians}
+            </div>
+            <div className="text-[10px] text-stone-400 mt-1 flex items-center gap-1">
+              <span>{t('قانونی سرپرست', 'Parents & Guardians')}</span>
+              <ArrowUpRight className="w-3 h-3 text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </div>
+
+          {/* 3. Teachers Count */}
+          <div
+            onClick={() => onNavigateMms('mms_teachers')}
+            className="bg-white p-4 rounded-2xl border border-stone-200 hover:border-sky-500 hover:shadow-xs cursor-pointer transition-all group"
+          >
+            <div className="flex items-center justify-between text-stone-400 mb-2">
+              <span className="text-xs font-semibold group-hover:text-sky-800 transition-colors">
+                {t('اساتذہ کرام', 'Teachers')}
+              </span>
+              <GraduationCap className="w-4 h-4 text-sky-700" />
+            </div>
+            <div className="text-2xl font-bold font-mono text-stone-900 group-hover:text-sky-800 transition-colors">
+              {phase3Counts.teachers}
+            </div>
+            <div className="text-[10px] text-stone-400 mt-1 flex items-center gap-1">
+              <span>{t('تدریسی عملہ', 'Faculty Members')}</span>
+              <ArrowUpRight className="w-3 h-3 text-sky-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </div>
+
+          {/* 4. Classes Count */}
+          <div
+            onClick={() => onNavigateMms('mms_classes')}
+            className="bg-white p-4 rounded-2xl border border-stone-200 hover:border-emerald-500 hover:shadow-xs cursor-pointer transition-all group"
+          >
+            <div className="flex items-center justify-between text-stone-400 mb-2">
+              <span className="text-xs font-semibold group-hover:text-emerald-800 transition-colors">
+                {t('کلاسز و درجات', 'Classes')}
+              </span>
+              <BookOpen className="w-4 h-4 text-emerald-700" />
+            </div>
+            <div className="text-2xl font-bold font-mono text-stone-900 group-hover:text-emerald-800 transition-colors">
+              {phase3Counts.classes}
+            </div>
+            <div className="text-[10px] text-stone-400 mt-1 flex items-center gap-1">
+              <span>{t('فعال درجات', 'Active Classes')}</span>
+              <ArrowUpRight className="w-3 h-3 text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </div>
+
+          {/* 5. Subjects Count */}
+          <div
+            onClick={() => onNavigateMms('mms_subjects')}
+            className="bg-white p-4 rounded-2xl border border-stone-200 hover:border-indigo-500 hover:shadow-xs cursor-pointer transition-all group"
+          >
+            <div className="flex items-center justify-between text-stone-400 mb-2">
+              <span className="text-xs font-semibold group-hover:text-indigo-800 transition-colors">
+                {t('مضامین و کتب', 'Subjects')}
+              </span>
+              <BookmarkCheck className="w-4 h-4 text-indigo-700" />
+            </div>
+            <div className="text-2xl font-bold font-mono text-stone-900 group-hover:text-indigo-800 transition-colors">
+              {phase3Counts.subjects}
+            </div>
+            <div className="text-[10px] text-stone-400 mt-1 flex items-center gap-1">
+              <span>{t('نصابی کتب', 'Curriculum Subjects')}</span>
+              <ArrowUpRight className="w-3 h-3 text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </div>
+
+          {/* 6. Active Enrollments */}
+          <div
+            onClick={() => onNavigateMms('mms_enrollments')}
+            className="bg-white p-4 rounded-2xl border border-stone-200 hover:border-teal-500 hover:shadow-xs cursor-pointer transition-all group"
+          >
+            <div className="flex items-center justify-between text-stone-400 mb-2">
+              <span className="text-xs font-semibold group-hover:text-teal-800 transition-colors">
+                {t('فعال داخلے', 'Enrollments')}
+              </span>
+              <FileSpreadsheet className="w-4 h-4 text-teal-700" />
+            </div>
+            <div className="text-2xl font-bold font-mono text-stone-900 group-hover:text-teal-800 transition-colors">
+              {phase3Counts.activeEnrollments}
+            </div>
+            <div className="text-[10px] text-stone-400 mt-1 flex items-center gap-1">
+              <span>{t('حاضر داخل شدہ طلباء', 'Active Enrollments')}</span>
+              <ArrowUpRight className="w-3 h-3 text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </div>
         </div>
       </div>
 

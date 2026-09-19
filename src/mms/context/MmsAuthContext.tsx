@@ -163,7 +163,21 @@ export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const initAuth = async () => {
       if (!isSupabaseConfigured) {
-        setIsLoading(false);
+        try {
+          const stored = localStorage.getItem('jamia_demo_auth_user');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed.user && parsed.profile) {
+              setUser(parsed.user);
+              setProfile(parsed.profile);
+              setRole(parsed.user.role);
+            }
+          }
+        } catch (e) {
+          console.error('[MMS Auth] Failed to restore local demo user:', e);
+        } finally {
+          setIsLoading(false);
+        }
         return;
       }
 
@@ -219,16 +233,87 @@ export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [fetchAndSetProfile]);
 
-  // Real Supabase login with email & password
+  // Real Supabase login with email & password (with demo fallback if credentials not configured)
   const login = async (
     email: string,
     password: string
   ): Promise<{ success: boolean; error?: string; role?: MmsRole }> => {
     if (!isSupabaseConfigured) {
-      return {
-        success: false,
-        error: 'Supabase credentials are not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in .env.local.'
+      const trimmedEmail = email.trim().toLowerCase();
+      let demoRole: MmsRole = 'parent';
+      let nameEn = 'Chaudhry Tariq Aziz';
+      let nameUr = 'چوہدری طارق عزیز';
+      let desigEn = 'Parent / Guardian';
+      let desigUr = 'سرپرست طالب علم';
+      let deptEn = 'Parents Portal';
+      let deptUr = 'اولیاء کرام پورٹل';
+      let demoId = '44444444-4444-4444-4444-444444444444';
+
+      if (trimmedEmail.includes('mudeer')) {
+        demoRole = 'mudeer';
+        nameEn = 'Maulana Muhammad Abdul Rehman';
+        nameUr = 'مولانا محمد عبد الرحمٰن';
+        desigEn = 'Director & Muhtamim';
+        desigUr = 'مہتمم و ناظمِ اعلیٰ';
+        deptEn = 'Central Administration';
+        deptUr = 'مرکزی انتظامیہ';
+        demoId = '11111111-1111-1111-1111-111111111111';
+      } else if (trimmedEmail.includes('teacher')) {
+        demoRole = 'teacher';
+        nameEn = 'Mufti Qari Shabbir Ahmad';
+        nameUr = 'مفتی قاری شبیر احمد';
+        desigEn = 'Hadith Lecturer & Hifz Supervisor';
+        desigUr = 'استاذِ حدیث و نگراں شعبہ حفظ';
+        deptEn = 'Dars-e-Nizami & Hifz Department';
+        deptUr = 'درسِ نظامی و شعبہ حفظ';
+        demoId = '22222222-2222-2222-2222-222222222222';
+      } else if (trimmedEmail.includes('counter')) {
+        demoRole = 'counter';
+        nameEn = 'Hafiz Waqas Mahmood';
+        nameUr = 'حافظ وقاص محمود';
+        desigEn = 'Accounts Clerk & Cashier';
+        desigUr = 'اکاؤنٹس کلرک و فیس انچارج';
+        deptEn = 'Finance & Fee Counter';
+        deptUr = 'شعبہ مالیات و فیس کاؤنٹر';
+        demoId = '33333333-3333-3333-3333-333333333333';
+      }
+
+      const mockUser: MmsUser = {
+        id: demoId,
+        nameEnglish: nameEn,
+        nameUrdu: nameUr,
+        email: trimmedEmail,
+        role: demoRole,
+        designationEnglish: desigEn,
+        designationUrdu: desigUr,
+        departmentEnglish: deptEn,
+        departmentUrdu: deptUr,
+        isActive: true,
       };
+      const mockProfile: SupabaseProfile = {
+        id: demoId,
+        email: trimmedEmail,
+        full_name: nameEn,
+        name_urdu: nameUr,
+        role: demoRole,
+        designation_english: desigEn,
+        designation_urdu: desigUr,
+        department_english: deptEn,
+        department_urdu: deptUr,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      try {
+        localStorage.setItem('jamia_demo_auth_user', JSON.stringify({ user: mockUser, profile: mockProfile }));
+      } catch (e) {
+        console.error('Failed to save demo auth user', e);
+      }
+      setUser(mockUser);
+      setProfile(mockProfile);
+      setRole(demoRole);
+      return { success: true, role: demoRole };
     }
 
     try {
@@ -381,6 +466,11 @@ export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } catch (e) {
       console.error('[MMS Auth] Error during Supabase signOut:', e);
     } finally {
+      try {
+        localStorage.removeItem('jamia_demo_auth_user');
+      } catch {
+        // ignore
+      }
       setUser(null);
       setProfile(null);
       setRole(null);

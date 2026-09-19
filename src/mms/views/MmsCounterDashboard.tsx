@@ -1,22 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  CreditCard,
-  HandCoins,
-  Coins,
-  Receipt,
-  FileCheck2,
-  PlusCircle,
   Search,
-  Printer,
-  Download,
-  CheckCircle,
-  Filter,
-  DollarSign,
+  Users,
+  BookOpen,
+  Phone,
+  Shield,
+  Calendar,
+  CheckCircle2,
+  AlertCircle,
+  FileSpreadsheet,
+  GraduationCap,
+  Eye,
+  X,
+  UserCheck,
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
-import { MmsStatCard } from '../components/MmsStatCard';
-import { MmsModal } from '../components/MmsModal';
-import { COUNTER_DASHBOARD_DATA } from '../data/mockData';
+import { phase3Service } from '../services/phase3DataService';
+import {
+  DbStudent,
+  DbGuardian,
+  StudentWithDetails,
+  EnrollmentWithDetails,
+} from '../types';
 
 interface MmsCounterDashboardProps {
   onNavigateMms: (route: string) => void;
@@ -24,50 +29,79 @@ interface MmsCounterDashboardProps {
 
 export const MmsCounterDashboard: React.FC<MmsCounterDashboardProps> = ({ onNavigateMms }) => {
   const { t } = useLanguage();
-  const kpis = COUNTER_DASHBOARD_DATA.kpis;
 
-  const [receipts, setReceipts] = useState(COUNTER_DASHBOARD_DATA.recentReceipts);
-  const [newReceiptModalOpen, setNewReceiptModalOpen] = useState(false);
-  const [printModalOpen, setPrintModalOpen] = useState(false);
-  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [students, setStudents] = useState<DbStudent[]>([]);
+  const [enrollments, setEnrollments] = useState<EnrollmentWithDetails[]>([]);
+  const [guardians, setGuardians] = useState<DbGuardian[]>([]);
+  const [studentGuardians, setStudentGuardians] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Form state for new mock receipt
-  const [formName, setFormName] = useState('');
-  const [formAmount, setFormAmount] = useState('');
-  const [formType, setFormType] = useState('ماہانہ فیس');
-  const [formMode, setFormMode] = useState('کیش');
+  // Modal for Viewing Full Student & Guardian & Enrollment Details
+  const [selectedStudent, setSelectedStudent] = useState<DbStudent | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  const filteredReceipts = receipts.filter((r) => {
-    const matchesSearch =
-      r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.receiptNo.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
+  useEffect(() => {
+    const loadCounterData = async () => {
+      setLoading(true);
+      try {
+        const [stList, enrList, gdList, sgList] = await Promise.all([
+          phase3Service.getStudents(),
+          phase3Service.getEnrollments(),
+          phase3Service.getGuardians(),
+          phase3Service.getStudentGuardians(),
+        ]);
+        setStudents(stList);
+        setEnrollments(enrList);
+        setGuardians(gdList);
+        setStudentGuardians(sgList);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadCounterData();
+  }, []);
+
+  const handleViewStudent = (student: DbStudent) => {
+    setSelectedStudent(student);
+    setIsDetailModalOpen(true);
+  };
+
+  // Filter students based on search term (name, admission number, phone)
+  const filteredStudents = students.filter((s) => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    const fullName = `${s.first_name} ${s.last_name}`.toLowerCase();
+    const admNo = s.admission_number.toLowerCase();
+    const phone = (s.phone || '').toLowerCase();
+    return fullName.includes(term) || admNo.includes(term) || phone.includes(term);
   });
 
-  const handleCreateReceipt = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formName || !formAmount) return;
-
-    const newEntry = {
-      receiptNo: `RCP-2026-0${892 + receipts.length}`,
-      name: formName,
-      type: formType,
-      amount: `Rs. ${formAmount}`,
-      mode: formMode,
-      time: 'ابھی جاری شدہ (Just now)',
-    };
-
-    setReceipts([newEntry, ...receipts]);
-    setNewReceiptModalOpen(false);
-    setSelectedReceipt(newEntry);
-    setPrintModalOpen(true);
-
-    // Reset
-    setFormName('');
-    setFormAmount('');
+  // Helper to find enrollment for student
+  const getStudentEnrollment = (studentId: string) => {
+    return (
+      enrollments.find((e) => e.student_id === studentId && e.status === 'enrolled') ||
+      enrollments.find((e) => e.student_id === studentId)
+    );
   };
+
+  // Helper to find guardians for student
+  const getStudentGuardiansList = (studentId: string) => {
+    const links = studentGuardians.filter((sg) => sg.student_id === studentId);
+    return links.map((link) => {
+      const g = guardians.find((gd) => gd.id === link.guardian_id);
+      return {
+        guardian: g,
+        relationship: link.relationship,
+        isPrimary: link.is_primary,
+      };
+    });
+  };
+
+  const selectedEnrollment = selectedStudent ? getStudentEnrollment(selectedStudent.id) : null;
+  const selectedGuardians = selectedStudent ? getStudentGuardiansList(selectedStudent.id) : [];
 
   return (
     <div className="space-y-6">
@@ -76,320 +110,299 @@ export const MmsCounterDashboard: React.FC<MmsCounterDashboardProps> = ({ onNavi
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-bold text-stone-900 font-h2">
-              {t('کاؤنٹر و فیس ڈیش بورڈ', 'Counter & Accounts Dashboard')}
+              {t('کاؤنٹر ڈیسک — تصدیق و معلوماتِ طلباء', 'Counter Desk — Student Verification & Info')}
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300">
-              {t('شعبہ مالیات و فیس کاؤنٹر', 'Finance & Cashier Desk')}
+              {t('کاؤنٹر پورٹل (Counter Desk)', 'Counter Portal')}
             </span>
           </div>
           <p className="text-xs text-stone-500 mt-1">
             {t(
-              'حافظ وقاص محمود — فیس وصولی، عمومی عطیات، زکوٰۃ و صدقات، اور رسیدات کا فوری اجراء۔',
-              'Hafiz Waqas Mahmood — Student fee processing, general donations, Zakat collections, and instant vouchers.'
+              'طلباء کی فوری تلاش، بنیادی تعلیمی کوائف، کلاس و داخلہ اسٹیٹس اور سرپرست رابطہ معلومات۔',
+              'Quick student directory lookup, verified academic records, class enrollment status, and parent contacts.'
             )}
           </p>
         </div>
 
-        <button
-          onClick={() => setNewReceiptModalOpen(true)}
-          className="px-4 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs transition-all flex items-center gap-2 shadow-sm"
-        >
-          <PlusCircle className="w-4 h-4 text-amber-300" />
-          <span>{t('نئی رسید جاری کریں (+)', 'Issue New Receipt (+)')}</span>
-        </button>
-      </div>
-
-      {/* 5 Required KPI Cards for Counter */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* 1. Today's Fee Collection */}
-        <MmsStatCard
-          labelUrdu={kpis.todayFees.labelUrdu}
-          labelEnglish={kpis.todayFees.labelEnglish}
-          value={kpis.todayFees.value}
-          subUrdu={kpis.todayFees.count}
-          subEnglish={kpis.todayFees.count}
-          icon={CreditCard}
-          accentColor="emerald"
-          onClick={() => onNavigateMms('mms_counter_fees')}
-        />
-
-        {/* 2. Today's Donations */}
-        <MmsStatCard
-          labelUrdu={kpis.todayDonations.labelUrdu}
-          labelEnglish={kpis.todayDonations.labelEnglish}
-          value={kpis.todayDonations.value}
-          subUrdu={kpis.todayDonations.count}
-          subEnglish={kpis.todayDonations.count}
-          icon={HandCoins}
-          accentColor="sky"
-          onClick={() => onNavigateMms('mms_counter_donations')}
-        />
-
-        {/* 3. Today's Zakat */}
-        <MmsStatCard
-          labelUrdu={kpis.todayZakat.labelUrdu}
-          labelEnglish={kpis.todayZakat.labelEnglish}
-          value={kpis.todayZakat.value}
-          subUrdu={kpis.todayZakat.count}
-          subEnglish={kpis.todayZakat.count}
-          icon={Coins}
-          accentColor="amber"
-          onClick={() => onNavigateMms('mms_counter_zakat')}
-        />
-
-        {/* 4. Today's Receipts */}
-        <MmsStatCard
-          labelUrdu={kpis.todayReceipts.labelUrdu}
-          labelEnglish={kpis.todayReceipts.labelEnglish}
-          value={kpis.todayReceipts.value}
-          subUrdu={kpis.todayReceipts.count}
-          subEnglish={kpis.todayReceipts.count}
-          icon={Receipt}
-          accentColor="stone"
-          onClick={() => onNavigateMms('mms_counter_receipts')}
-        />
-
-        {/* 5. Pending Fee Records */}
-        <MmsStatCard
-          labelUrdu={kpis.pendingFeeRecords.labelUrdu}
-          labelEnglish={kpis.pendingFeeRecords.labelEnglish}
-          value={kpis.pendingFeeRecords.value}
-          subUrdu={kpis.pendingFeeRecords.count}
-          subEnglish={kpis.pendingFeeRecords.count}
-          trend="فوری فالو اپ"
-          trendType="warning"
-          icon={FileCheck2}
-          accentColor="rose"
-        />
-      </div>
-
-      {/* Receipts Table with Search & Print */}
-      <div className="bg-white border border-stone-200 rounded-2xl shadow-2xs overflow-hidden">
-        <div className="p-4 border-b border-stone-200 flex flex-wrap items-center justify-between gap-3 bg-stone-50/60">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold text-stone-900 font-h2">
-              {t('آج کی جاری کردہ رسیدات', "Today's Issued Receipts & Vouchers")}
-            </h3>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">
-              {filteredReceipts.length}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('رسید نمبر یا نام سے تلاش...', 'Search by receipt # or name...')}
-                className="ps-8 pe-3 py-1.5 bg-white border border-stone-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-700 w-56 sm:w-64"
-              />
-              <Search className="w-3.5 h-3.5 text-stone-400 absolute start-2.5 top-2.5" />
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="px-3.5 py-1.5 rounded-xl bg-stone-100 border border-stone-200 text-xs">
+            <span className="text-stone-500">{t('کل طلباء:', 'Total Students:')} </span>
+            <strong className="text-emerald-800 font-mono font-bold">{students.length}</strong>
           </div>
         </div>
+      </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-start text-xs">
-            <thead className="bg-stone-50 text-stone-600 border-b border-stone-200">
-              <tr>
-                <th className="py-3 px-4 text-start">{t('رسید نمبر', 'Receipt #')}</th>
-                <th className="py-3 px-4 text-start">{t('ادا کنندہ کا نام', 'Payer / Student')}</th>
-                <th className="py-3 px-4 text-start">{t('مد / کیٹیگری', 'Category')}</th>
-                <th className="py-3 px-4 text-start">{t('رقم', 'Amount')}</th>
-                <th className="py-3 px-4 text-start">{t('ادائیگی طریقہ', 'Mode')}</th>
-                <th className="py-3 px-4 text-start">{t('وقت', 'Time')}</th>
-                <th className="py-3 px-4 text-end">{t('پرنٹ رسید', 'Action')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100">
-              {filteredReceipts.map((row, i) => (
-                <tr key={i} className="hover:bg-stone-50/70 transition-colors">
-                  <td className="py-3 px-4 font-mono font-bold text-emerald-900">
-                    {row.receiptNo}
-                  </td>
-                  <td className="py-3 px-4 font-semibold text-stone-800">
-                    {row.name}
-                  </td>
-                  <td className="py-3 px-4 text-stone-600">
-                    <span className="px-2 py-0.5 rounded bg-stone-100 text-stone-700">
-                      {row.type}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 font-mono font-bold text-stone-900">
-                    {row.amount}
-                  </td>
-                  <td className="py-3 px-4 text-stone-500">{row.mode}</td>
-                  <td className="py-3 px-4 text-stone-400 font-mono text-[11px]">{row.time}</td>
-                  <td className="py-3 px-4 text-end">
-                    <button
-                      onClick={() => {
-                        setSelectedReceipt(row);
-                        setPrintModalOpen(true);
-                      }}
-                      className="px-2.5 py-1 rounded-lg border border-stone-200 hover:bg-stone-100 text-stone-700 font-medium inline-flex items-center gap-1 text-[11px]"
-                      title="View & Print Voucher"
-                    >
-                      <Printer className="w-3 h-3 text-stone-500" />
-                      <span>{t('رسید دیکھیں', 'View')}</span>
-                    </button>
-                  </td>
+      {/* Student Search & Quick Lookup Bar */}
+      <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-2xs">
+        <div className="relative">
+          <Search className="w-4 h-4 text-stone-400 absolute start-3.5 top-3.5" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder={t(
+              'طالب علم کے نام، داخلہ نمبر (مثلاً: JTU-2026-001) یا فون نمبر سے تلاش کریں...',
+              'Search by student name, admission # (e.g. JTU-2026-001), or phone number...'
+            )}
+            className="w-full ps-10 pe-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:bg-white transition-all font-medium"
+          />
+        </div>
+      </div>
+
+      {/* Directory Table */}
+      <div className="bg-white rounded-2xl border border-stone-200 shadow-2xs overflow-hidden">
+        {loading ? (
+          <div className="p-12 text-center text-stone-500 text-xs">
+            <div className="w-8 h-8 border-2 border-emerald-800 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <span>{t('طلباء ریکارڈ لوڈ ہو رہا ہے...', 'Loading student records...')}</span>
+          </div>
+        ) : filteredStudents.length === 0 ? (
+          <div className="p-12 text-center text-stone-500">
+            <Users className="w-10 h-10 text-stone-300 mx-auto mb-2" />
+            <p className="font-semibold text-sm text-stone-700">{t('کوئی طالب علم نہیں ملا', 'No students found')}</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-start text-xs">
+              <thead className="bg-stone-50 text-stone-600 border-b border-stone-200 uppercase font-semibold tracking-wider text-[11px]">
+                <tr>
+                  <th className="px-4 py-3 text-start">{t('داخلہ نمبر', 'Adm #')}</th>
+                  <th className="px-4 py-3 text-start">{t('نام طالب علم', 'Student Name')}</th>
+                  <th className="px-4 py-3 text-start">{t('کلاس / درجہ', 'Current Class')}</th>
+                  <th className="px-4 py-3 text-start">{t('سرپرست و رابطہ', 'Guardian & Contact')}</th>
+                  <th className="px-4 py-3 text-start">{t('کیفیت', 'Status')}</th>
+                  <th className="px-4 py-3 text-end">{t('تفصیلات', 'Details')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-stone-100">
+                {filteredStudents.map((s) => {
+                  const enrollment = getStudentEnrollment(s.id);
+                  const guardianLinks = getStudentGuardiansList(s.id);
+                  const primaryGuardian = guardianLinks.find((g) => g.isPrimary) || guardianLinks[0];
+
+                  return (
+                    <tr key={s.id} className="hover:bg-stone-50/70 transition-colors">
+                      <td className="px-4 py-3 font-mono font-bold text-emerald-800">
+                        {s.admission_number}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-bold text-stone-900">
+                          {s.first_name} {s.last_name}
+                        </div>
+                        <div className="text-[11px] text-stone-400">
+                          {s.gender === 'male' ? t('طالب علم', 'Male') : t('طالبہ', 'Female')} • {s.date_of_birth}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        {enrollment ? (
+                          <div>
+                            <span className="font-semibold text-stone-800">{enrollment.class.name}</span>
+                            <div className="text-[11px] text-stone-400 font-mono">
+                              {enrollment.class.code} • {enrollment.academic_year}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-stone-400 italic text-[11px]">
+                            {t('غیر مندرج', 'Not Enrolled')}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {primaryGuardian?.guardian ? (
+                          <div>
+                            <div className="font-semibold text-stone-800">
+                              {primaryGuardian.guardian.full_name}{' '}
+                              <span className="text-[10px] text-stone-400">({primaryGuardian.relationship})</span>
+                            </div>
+                            <div className="text-[11px] font-mono text-emerald-800 flex items-center gap-1">
+                              <Phone className="w-3 h-3 text-emerald-600" />
+                              <span>{primaryGuardian.guardian.phone}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-stone-400 italic text-[11px]">
+                            {t('کوئی سرپرست نہیں', 'No guardian')}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            s.status === 'active'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                              : 'bg-stone-100 text-stone-700'
+                          }`}
+                        >
+                          {s.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-end">
+                        <button
+                          onClick={() => handleViewStudent(s)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-emerald-800 hover:bg-emerald-50 text-xs font-semibold border border-emerald-200 transition-colors"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>{t('معائنہ', 'View')}</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* New Receipt Modal */}
-      <MmsModal
-        isOpen={newReceiptModalOpen}
-        onClose={() => setNewReceiptModalOpen(false)}
-        title={t('نئی رسید / فیس واؤچر جاری کریں', 'Issue New Payment Receipt')}
-        subtitle={t('ڈیمو اندراج (فوری جاری شدہ رسید کی سمولیشن)', 'Mock Receipt Generator')}
-      >
-        <form onSubmit={handleCreateReceipt} className="space-y-4 text-xs">
-          <div>
-            <label className="block font-semibold text-stone-700 mb-1">
-              {t('ادا کنندہ / طالب علم کا نام:', 'Payer or Student Name:')}
-            </label>
-            <input
-              type="text"
-              required
-              value={formName}
-              onChange={(e) => setFormName(e.target.value)}
-              placeholder="محمد عثمان (والد: طارق جاوید)"
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block font-semibold text-stone-700 mb-1">
-                {t('رقم (PKR):', 'Amount (PKR):')}
-              </label>
-              <input
-                type="number"
-                required
-                value={formAmount}
-                onChange={(e) => setFormAmount(e.target.value)}
-                placeholder="4500"
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-stone-700 mb-1">
-                {t('مد / فنڈ:', 'Category:')}
-              </label>
-              <select
-                value={formType}
-                onChange={(e) => setFormType(e.target.value)}
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs bg-white"
-              >
-                <option value="ماہانہ تعلیمی فیس">ماہانہ تعلیمی فیس (Tuition Fee)</option>
-                <option value="ہاسٹل و طعام فیس">ہاسٹل و طعام فیس (Hostel/Mess)</option>
-                <option value="زکوٰۃ فنڈ برائے طلباء">زکوٰۃ فنڈ (Zakat Fund)</option>
-                <option value="صدقات و خیرات">صدقات و خیرات (Sadaqah)</option>
-                <option value="عمومی عطیہ جامعہ">عمومی عطیہ (General Donation)</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block font-semibold text-stone-700 mb-1">
-              {t('ادائیگی کا طریقہ:', 'Payment Method:')}
-            </label>
-            <select
-              value={formMode}
-              onChange={(e) => setFormMode(e.target.value)}
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs bg-white"
-            >
-              <option value="کیش (نقد)">کیش (نقد - Cash)</option>
-              <option value="بینک ٹرانسفر (آن لائن)">بینک ٹرانسفر (Online Transfer)</option>
-              <option value="چیک / ڈرافٹ">چیک / ڈرافٹ (Cheque)</option>
-            </select>
-          </div>
-
-          <div className="pt-2 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setNewReceiptModalOpen(false)}
-              className="px-4 py-2 rounded-lg border border-stone-300 text-stone-700 hover:bg-stone-50"
-            >
-              {t('منسوخ', 'Cancel')}
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-lg bg-emerald-800 text-white font-bold hover:bg-emerald-900"
-            >
-              {t('رسید جاری کریں (Generate)', 'Generate Receipt')}
-            </button>
-          </div>
-        </form>
-      </MmsModal>
-
-      {/* Print / View Receipt Modal */}
-      {selectedReceipt && (
-        <MmsModal
-          isOpen={printModalOpen}
-          onClose={() => setPrintModalOpen(false)}
-          title={t('رسید کی نقل / واؤچر', 'Official Receipt Voucher')}
-          subtitle={selectedReceipt.receiptNo}
-        >
-          <div className="space-y-4 text-xs font-sans">
-            <div className="p-5 border-2 border-dashed border-emerald-800/40 rounded-xl bg-emerald-50/30 space-y-3">
-              <div className="text-center border-b border-emerald-800/20 pb-2">
-                <h4 className="font-bold text-emerald-950 text-sm font-h2">
-                  جامعۃ العلوم الاسلامیہ میرپور آزاد کشمیر
-                </h4>
-                <p className="text-[10px] text-stone-500">
-                  شعبہ مالیات و حسابات | فیس و عطیات رسید
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-stone-700">
-                <div>
-                  <span className="text-stone-400">رسید نمبر: </span>
-                  <span className="font-bold font-mono text-emerald-900">{selectedReceipt.receiptNo}</span>
-                </div>
-                <div>
-                  <span className="text-stone-400">تاریخ و وقت: </span>
-                  <span className="font-medium">{selectedReceipt.time}</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-stone-400">محترم / طالب علم: </span>
-                  <span className="font-bold text-stone-900">{selectedReceipt.name}</span>
-                </div>
-                <div>
-                  <span className="text-stone-400">مد: </span>
-                  <span className="font-medium">{selectedReceipt.type}</span>
-                </div>
-                <div>
-                  <span className="text-stone-400">طریقہ: </span>
-                  <span className="font-medium">{selectedReceipt.mode}</span>
-                </div>
-                <div className="col-span-2 pt-2 border-t border-stone-200 flex justify-between items-center text-sm font-bold text-stone-950">
-                  <span>وصول شدہ رقم:</span>
-                  <span className="text-base text-emerald-900 font-mono">{selectedReceipt.amount}</span>
-                </div>
-              </div>
-
-              <div className="pt-2 text-[10px] text-stone-400 text-center">
-                جزاكم الله خيراً — کمپیوٹرائزڈ رسید، دستخط کی حاجت نہیں۔
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end gap-2">
+      {/* Student Details & Guardian Contact Modal */}
+      {isDetailModalOpen && selectedStudent && (
+        <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 border border-stone-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-stone-200 pb-3 mb-4">
+              <h2 className="text-base font-bold text-stone-900 font-h2 flex items-center gap-2">
+                <UserCheck className="w-5 h-5 text-emerald-800" />
+                <span>{t('طالب علم کی تصدیقی معلومات', 'Student Verification Record')}</span>
+              </h2>
               <button
-                onClick={() => setPrintModalOpen(false)}
-                className="px-4 py-2 rounded-lg bg-emerald-800 text-white font-bold hover:bg-emerald-900"
+                onClick={() => setIsDetailModalOpen(false)}
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-700"
               >
-                {t('بند کریں', 'Close')}
+                <X className="w-5 h-5" />
               </button>
             </div>
+
+            <div className="space-y-4 text-xs">
+              {/* Student Header */}
+              <div className="p-4 bg-stone-50 rounded-2xl border border-stone-200 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-stone-900 font-h2">
+                    {selectedStudent.first_name} {selectedStudent.last_name}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1 text-stone-500 font-mono">
+                    <span className="font-bold text-emerald-800">{selectedStudent.admission_number}</span>
+                    <span>•</span>
+                    <span>{selectedStudent.admission_date}</span>
+                  </div>
+                </div>
+
+                <span className="px-3 py-1 rounded-full text-xs font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  {selectedStudent.status}
+                </span>
+              </div>
+
+              {/* Bio Grid */}
+              <div className="grid grid-cols-2 gap-3 p-3.5 bg-stone-50 rounded-xl border border-stone-200">
+                <div>
+                  <span className="text-stone-400 block">{t('جنس:', 'Gender:')}</span>
+                  <span className="font-semibold text-stone-800">
+                    {selectedStudent.gender === 'male' ? t('مرد / طالب علم', 'Male') : t('خاتون / طالبہ', 'Female')}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-stone-400 block">{t('تاریخِ پیدائش:', 'Date of Birth:')}</span>
+                  <span className="font-mono text-stone-800">{selectedStudent.date_of_birth}</span>
+                </div>
+                <div>
+                  <span className="text-stone-400 block">{t('رابطہ فون:', 'Contact Phone:')}</span>
+                  <span className="font-mono text-stone-800">{selectedStudent.phone || t('درج نہیں', 'None')}</span>
+                </div>
+                <div>
+                  <span className="text-stone-400 block">{t('پتہ و رہائش:', 'Address:')}</span>
+                  <span className="text-stone-800">{selectedStudent.address || t('درج نہیں', 'None')}</span>
+                </div>
+              </div>
+
+              {/* Current Enrollment / Class Information */}
+              <div className="border border-stone-200 rounded-xl p-3.5">
+                <h4 className="font-bold text-stone-900 uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
+                  <GraduationCap className="w-4 h-4 text-emerald-700" />
+                  <span>{t('موجودہ کلاس و داخلہ ریکارڈ', 'Current Class & Enrollment')}</span>
+                </h4>
+
+                {selectedEnrollment ? (
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-stone-400">{t('کلاس کا نام:', 'Class Name:')} </span>
+                      <strong className="text-stone-900">{selectedEnrollment.class.name}</strong>
+                    </div>
+                    <div>
+                      <span className="text-stone-400">{t('کلاس کوڈ:', 'Class Code:')} </span>
+                      <strong className="text-emerald-800 font-mono">{selectedEnrollment.class.code}</strong>
+                    </div>
+                    <div>
+                      <span className="text-stone-400">{t('تعلیمی سال:', 'Academic Year:')} </span>
+                      <strong className="text-stone-800 font-mono">{selectedEnrollment.academic_year}</strong>
+                    </div>
+                    <div>
+                      <span className="text-stone-400">{t('داخلہ تاریخ:', 'Enrollment Date:')} </span>
+                      <strong className="text-stone-800 font-mono">{selectedEnrollment.enrollment_date}</strong>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-stone-400 italic text-[11px]">
+                    {t('اس طالب علم کا کوئی فعال کلاس داخلہ نہیں ہے۔', 'No active enrollment for this student.')}
+                  </p>
+                )}
+              </div>
+
+              {/* Guardian Contact Information */}
+              <div className="border border-stone-200 rounded-xl p-3.5">
+                <h4 className="font-bold text-stone-900 uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
+                  <Shield className="w-4 h-4 text-amber-700" />
+                  <span>{t('قانونی سرپرست و ہنگامی رابطہ نمبرات', 'Guardian Contacts')}</span>
+                </h4>
+
+                {selectedGuardians.length === 0 ? (
+                  <p className="text-stone-400 italic text-[11px]">
+                    {t('کوئی سرپرست منسلک نہیں ہے۔', 'No linked guardians.')}
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {selectedGuardians.map((g, idx) => (
+                      <div
+                        key={idx}
+                        className="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between"
+                      >
+                        <div>
+                          <div className="font-bold text-stone-900">
+                            {g.guardian?.full_name}
+                            <span className="ms-2 text-[10px] font-normal px-2 py-0.5 rounded bg-stone-200 text-stone-700">
+                              {g.relationship}
+                            </span>
+                            {g.isPrimary && (
+                              <span className="ms-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">
+                                {t('بنیادی سرپرست', 'Primary')}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 text-[11px] font-mono text-stone-600 mt-1">
+                            <span className="flex items-center gap-1 text-emerald-800 font-bold">
+                              <Phone className="w-3 h-3" />
+                              {g.guardian?.phone}
+                            </span>
+                            {g.guardian?.alternate_phone && (
+                              <span>• {g.guardian.alternate_phone}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsDetailModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs"
+                >
+                  {t('بند کریں', 'Close')}
+                </button>
+              </div>
+            </div>
           </div>
-        </MmsModal>
+        </div>
       )}
     </div>
   );

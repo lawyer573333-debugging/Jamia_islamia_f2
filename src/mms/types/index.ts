@@ -1,11 +1,25 @@
 export type MmsRole = 'mudeer' | 'teacher' | 'counter' | 'parent';
 
+// Phase 4: Institutional Positions separating person, position, and domain authority
+export type InstitutionalPosition =
+  | 'muhtamim'            // مہتمم (Institutional oversight & inspection, read-only on operations)
+  | 'nazim_aala'          // ناظمِ اعلیٰ (Chief operational authority, full institutional management)
+  | 'departmental_nazim'  // ناظمِ شعبہ (Scoped management of an assigned domain)
+  | 'teacher'             // استاذ (Operational instructional work, assignment-scoped)
+  | 'worker'              // کارکن / دفتری عملہ (Operational support work)
+  | 'counter'             // کاؤنٹر کلرک (Front-desk registration & fee verification)
+  | 'parent';             // سرپرست (Linked children only)
+
+export type InstitutionalDomain = 'academic' | 'all' | string;
+
 export interface SupabaseProfile {
   id: string;
   email: string;
   full_name: string;
   name_urdu?: string | null;
   role: MmsRole;
+  institutional_position?: InstitutionalPosition | null;
+  assigned_domain?: string | null;
   designation_english?: string | null;
   designation_urdu?: string | null;
   department_english?: string | null;
@@ -22,6 +36,12 @@ export interface MmsUser {
   nameEnglish: string;
   email: string;
   role: MmsRole;
+  institutionalPosition?: InstitutionalPosition;
+  assignedDomain?: string | null;
+  // Authority capabilities
+  canOversee?: boolean;
+  canManageOperations?: boolean;
+  canManageAcademics?: boolean;
   designationUrdu: string;
   designationEnglish: string;
   departmentUrdu?: string;

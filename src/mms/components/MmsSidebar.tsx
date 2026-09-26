@@ -50,10 +50,28 @@ export const MmsSidebar: React.FC<MmsSidebarProps> = ({
   onClose,
 }) => {
   const { isRtl, t } = useLanguage();
-  const { user, role, logout } = useMmsAuth();
+  const { user, role, institutionalPosition, assignedDomain, canOversee, canManageOperations, canManageAcademics, logout } = useMmsAuth();
 
+  const isInstitutional = Boolean(
+    canOversee ||
+    institutionalPosition === 'muhtamim' ||
+    institutionalPosition === 'nazim_aala' ||
+    institutionalPosition === 'departmental_nazim' ||
+    role === 'mudeer'
+  );
   const currentRole = role || 'mudeer';
-  const navItems: MmsNavItem[] = ROLE_NAVIGATION[currentRole] || ROLE_NAVIGATION.mudeer;
+  const navItems: MmsNavItem[] = isInstitutional
+    ? ROLE_NAVIGATION.mudeer
+    : (ROLE_NAVIGATION[currentRole] || ROLE_NAVIGATION.parent);
+
+  // Derive section title based on institutional authority
+  const sectionTitle = institutionalPosition === 'muhtamim'
+    ? t('ادارہ جاتی معائنہ و نگرانی', 'Institutional Oversight')
+    : institutionalPosition === 'nazim_aala'
+    ? t('مرکزی انتظامی اختیارات', 'Chief Operational Command')
+    : institutionalPosition === 'departmental_nazim'
+    ? t(`شعبہ جاتی اختیارات (${assignedDomain || 'تعلیمات'})`, `Domain Authority (${assignedDomain || 'Academic'})`)
+    : t('نظام کے ماڈیولز', 'System Modules');
 
   // Icon mapping
   const renderIcon = (iconName: string, className = 'w-4 h-4') => {
@@ -152,8 +170,13 @@ export const MmsSidebar: React.FC<MmsSidebarProps> = ({
 
         {/* Navigation Items List */}
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-          <div className="px-3 pb-2 text-[10px] font-bold text-emerald-300/80 uppercase tracking-wider">
-            {t('نظام کے ماڈیولز', 'System Modules')}
+          <div className="px-3 pb-2 text-[10px] font-bold text-emerald-300/80 uppercase tracking-wider flex items-center justify-between">
+            <span>{sectionTitle}</span>
+            {institutionalPosition === 'muhtamim' && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                {t('صرف معائنہ', 'Inspection')}
+              </span>
+            )}
           </div>
 
           {navItems.map((item) => {
@@ -183,7 +206,7 @@ export const MmsSidebar: React.FC<MmsSidebarProps> = ({
                   </span>
                 </div>
 
-                {item.badge && (
+                {item.badge ? (
                   <span
                     className={`ms-2 px-2 py-0.5 text-[10px] rounded-full font-bold ${
                       isActive
@@ -195,14 +218,46 @@ export const MmsSidebar: React.FC<MmsSidebarProps> = ({
                   >
                     {item.badge}
                   </span>
-                )}
+                ) : institutionalPosition === 'muhtamim' && item.id !== 'mms_dashboard' ? (
+                  <span
+                    className={`ms-2 px-1.5 py-0.5 text-[9px] rounded font-medium ${
+                      isActive
+                        ? 'bg-stone-900/30 text-stone-950'
+                        : 'text-emerald-300/70 opacity-60'
+                    }`}
+                  >
+                    {t('معائنہ', 'Audit')}
+                  </span>
+                ) : null}
               </button>
             );
           })}
         </div>
 
         {/* Bottom User info and Logout */}
-        <div className="p-3 border-t border-emerald-900/80 bg-emerald-950/70">
+        <div className="p-3 border-t border-emerald-900/80 bg-emerald-950/70 space-y-2">
+          {/* Institutional Position Indicator */}
+          {institutionalPosition && (
+            <div className="px-2.5 py-1 rounded-lg bg-emerald-900/80 border border-emerald-700/50 flex items-center justify-between text-[10px]">
+              <span className="text-emerald-300/80">{t('منصب و اختیار:', 'Authority:')}</span>
+              <span className={`font-bold ${
+                institutionalPosition === 'muhtamim'
+                  ? 'text-amber-300'
+                  : institutionalPosition === 'nazim_aala'
+                  ? 'text-emerald-200'
+                  : 'text-sky-300'
+              }`}>
+                {institutionalPosition === 'muhtamim'
+                  ? t('مہتمم (نگرانی و معائنہ)', 'Muhtamim (Oversight)')
+                  : institutionalPosition === 'nazim_aala'
+                  ? t('ناظمِ اعلیٰ (مرکزی ایڈمن)', 'Nazim-e-Aala (Admin)')
+                  : institutionalPosition === 'departmental_nazim'
+                  ? t(`ناظمِ شعبہ (${assignedDomain || 'تعلیمات'})`, `Dept: ${assignedDomain || 'Academic'}`)
+                  : institutionalPosition}
+              </span>
+            </div>
+          )}
+
           <div className="p-2.5 rounded-xl bg-emerald-900/50 border border-emerald-800/70 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 truncate">
               <div className="w-8 h-8 rounded-lg bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center shrink-0">

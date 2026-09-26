@@ -29,19 +29,40 @@ export const MmsTopBar: React.FC<MmsTopBarProps> = ({
   const { user, logout } = useMmsAuth();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
-  const roleColors = {
-    mudeer: 'bg-emerald-100 text-emerald-900 border-emerald-300',
-    teacher: 'bg-sky-100 text-sky-900 border-sky-300',
-    counter: 'bg-amber-100 text-amber-900 border-amber-300',
-    parent: 'bg-purple-100 text-purple-900 border-purple-300',
-  }[user?.role || 'mudeer'];
+  const position = user?.institutionalPosition;
 
-  const roleLabels = {
-    mudeer: { ur: 'مہتمم پورٹل (Mudeer)', en: 'Mudeer / Director' },
-    teacher: { ur: 'استاذ پورٹل (Teacher)', en: 'Teacher / Faculty' },
-    counter: { ur: 'کاؤنٹر و فیس (Cashier)', en: 'Cashier / Counter' },
-    parent: { ur: 'سرپرست پورٹل (Parent)', en: 'Parent / Guardian' },
-  }[user?.role || 'mudeer'];
+  const authorityBadge = position === 'muhtamim'
+    ? {
+        color: 'bg-amber-100 text-amber-900 border-amber-300',
+        label: { ur: 'مہتممِ جامعہ (معائنہ و نگرانی)', en: 'Muhtamim (Oversight)' },
+      }
+    : position === 'nazim_aala'
+    ? {
+        color: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+        label: { ur: 'ناظمِ اعلیٰ (مرکزی ایڈمن)', en: 'Nazim-e-Aala (Admin)' },
+      }
+    : position === 'departmental_nazim'
+    ? {
+        color: 'bg-teal-100 text-teal-900 border-teal-300',
+        label: {
+          ur: `ناظمِ شعبہ (${user?.assignedDomain === 'academic' ? 'تعلیمات' : user?.assignedDomain || 'انتظامی'})`,
+          en: `Dept Manager (${user?.assignedDomain || 'Academic'})`,
+        },
+      }
+    : {
+        color: {
+          mudeer: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+          teacher: 'bg-sky-100 text-sky-900 border-sky-300',
+          counter: 'bg-amber-100 text-amber-900 border-amber-300',
+          parent: 'bg-purple-100 text-purple-900 border-purple-300',
+        }[user?.role || 'mudeer'],
+        label: {
+          mudeer: { ur: 'مرکزی انتظامیہ (Admin)', en: 'Mudeer / Director' },
+          teacher: { ur: 'استاذ پورٹل (Teacher)', en: 'Teacher / Faculty' },
+          counter: { ur: 'کاؤنٹر و فیس (Cashier)', en: 'Cashier / Counter' },
+          parent: { ur: 'سرپرست پورٹل (Parent)', en: 'Parent / Guardian' },
+        }[user?.role || 'mudeer'],
+      };
 
   const handleLogout = async () => {
     await logout();
@@ -71,11 +92,11 @@ export const MmsTopBar: React.FC<MmsTopBarProps> = ({
               {t('مدارس مینجمنٹ سسٹم', 'Madaris Management System')}
             </span>
 
-            {/* Role indicator tag */}
+            {/* Institutional position / Role indicator tag */}
             <span
-              className={`ms-1.5 px-2 py-0.5 rounded text-[11px] font-bold border ${roleColors}`}
+              className={`ms-1.5 px-2 py-0.5 rounded text-[11px] font-bold border ${authorityBadge.color}`}
             >
-              {t(roleLabels.ur, roleLabels.en)}
+              {t(authorityBadge.label.ur, authorityBadge.label.en)}
             </span>
           </div>
         </div>
@@ -153,9 +174,9 @@ export const MmsTopBar: React.FC<MmsTopBarProps> = ({
                   </p>
                   <p className="text-xs text-emerald-800 font-mono mt-0.5">{user?.email}</p>
                   <span
-                    className={`inline-block mt-1.5 px-2 py-0.5 text-[10px] font-bold rounded border ${roleColors}`}
+                    className={`inline-block mt-1.5 px-2 py-0.5 text-[10px] font-bold rounded border ${authorityBadge.color}`}
                   >
-                    {t(roleLabels.ur, roleLabels.en)}
+                    {t(authorityBadge.label.ur, authorityBadge.label.en)}
                   </span>
                 </div>
 

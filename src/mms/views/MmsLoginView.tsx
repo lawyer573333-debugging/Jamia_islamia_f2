@@ -19,10 +19,10 @@ import {
 import { useLanguage } from '../../context/LanguageContext';
 import { useMmsAuth } from '../context/MmsAuthContext';
 import { DEMO_CREDENTIALS } from '../data/mockData';
-import { MmsRole } from '../types';
+import { MmsRole, InstitutionalPosition } from '../types';
 
 interface MmsLoginViewProps {
-  onLoginSuccess: (role: MmsRole) => void;
+  onLoginSuccess: (role: MmsRole, position?: InstitutionalPosition) => void;
   onBackToWebsite: () => void;
 }
 
@@ -37,11 +37,12 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
   const [authMode, setAuthMode] = useState<'signin' | 'register'>('signin');
 
   // Form states
-  const [email, setEmail] = useState('mudeer@jamia.edu.pk');
+  const [email, setEmail] = useState('nazimaala@demo.local');
   const [password, setPassword] = useState('Demo@123');
   const [fullName, setFullName] = useState('Maulana Muhammad Abdul Rehman');
   const [nameUrdu, setNameUrdu] = useState('مولانا محمد عبد الرحمٰن');
   const [selectedRole, setSelectedRole] = useState<MmsRole>('mudeer');
+  const [selectedPreset, setSelectedPreset] = useState<string>('nazim_aala');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -49,6 +50,27 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
   // Setup / SQL modal state
   const [showSqlModal, setShowSqlModal] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
+
+  const handleSelectPreset = (presetKey: string) => {
+    setSelectedPreset(presetKey);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    const cred = DEMO_CREDENTIALS.find(c => {
+      if (presetKey === 'muhtamim') return c.position === 'muhtamim';
+      if (presetKey === 'nazim_aala') return c.position === 'nazim_aala';
+      if (presetKey === 'departmental_nazim') return c.position === 'departmental_nazim';
+      return c.role === presetKey;
+    });
+
+    if (cred) {
+      setSelectedRole(cred.role);
+      setEmail(cred.email);
+      setPassword(cred.password);
+      setFullName(cred.nameEnglish);
+      setNameUrdu(cred.nameUrdu);
+    }
+  };
 
   const handleRoleSelect = (role: MmsRole) => {
     setSelectedRole(role);
@@ -58,28 +80,16 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
     // Provide default email & names matching the 4 Jamia institutional accounts
     switch (role) {
       case 'mudeer':
-        setEmail('mudeer@jamia.edu.pk');
-        setPassword('Demo@123');
-        setFullName('Maulana Muhammad Abdul Rehman');
-        setNameUrdu('مولانا محمد عبد الرحمٰن');
+        handleSelectPreset('nazim_aala');
         break;
       case 'teacher':
-        setEmail('teacher@jamia.edu.pk');
-        setPassword('Demo@123');
-        setFullName('Mufti Qari Shabbir Ahmad');
-        setNameUrdu('مفتی قاری شبیر احمد');
+        handleSelectPreset('teacher');
         break;
       case 'counter':
-        setEmail('counter@jamia.edu.pk');
-        setPassword('Demo@123');
-        setFullName('Hafiz Waqas Mahmood');
-        setNameUrdu('حافظ وقاص محمود');
+        handleSelectPreset('counter');
         break;
       case 'parent':
-        setEmail('parent@jamia.edu.pk');
-        setPassword('Demo@123');
-        setFullName('Chaudhry Tariq Aziz');
-        setNameUrdu('چوہدری طارق عزیز');
+        handleSelectPreset('parent');
         break;
     }
   };
@@ -93,7 +103,7 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
     try {
       const res = await login(email, password);
       if (res.success && res.role) {
-        onLoginSuccess(res.role);
+        onLoginSuccess(res.role, res.position);
       } else {
         setErrorMessage(
           res.error ||
@@ -253,12 +263,12 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
               </div>
             </div>
 
-            {/* 4 Supported Roles Summary */}
+            {/* Phase 4 Institutional Authority Summary */}
             <div className="relative z-10 mt-8 pt-6 border-t border-emerald-800/80">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-semibold text-emerald-200 flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-amber-400" />
-                  <span>{t('۴ مجاز کردار (Phase 2 Roles):', '4 Institutional Roles:')}</span>
+                  <span>{t('ادارہ جاتی اختیارات کا ماڈل (Phase 4):', 'Institutional Authority Model:')}</span>
                 </p>
                 <button
                   onClick={() => setShowSqlModal(true)}
@@ -271,20 +281,20 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
 
               <div className="grid grid-cols-2 gap-2 text-[11px]">
                 <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
-                  <p className="font-bold text-amber-300">{t('۱. مہتمم (Mudeer)', '1. Mudeer')}</p>
-                  <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">mudeer@jamia.edu.pk</p>
+                  <p className="font-bold text-amber-300">{t('مہتمم (معائنہ و نگرانی)', 'Muhtamim (Inspection)')}</p>
+                  <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">muhtamim@demo.local</p>
                 </div>
                 <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
-                  <p className="font-bold text-amber-300">{t('۲. استاذ (Teacher)', '2. Teacher')}</p>
-                  <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">teacher@jamia.edu.pk</p>
+                  <p className="font-bold text-amber-300">{t('ناظمِ اعلیٰ (چیف ایگزیکٹو)', 'Nazim-e-Aala (Operations)')}</p>
+                  <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">nazimaala@demo.local</p>
                 </div>
                 <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
-                  <p className="font-bold text-amber-300">{t('۳. کاؤنٹر (Counter)', '3. Counter')}</p>
-                  <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">counter@jamia.edu.pk</p>
+                  <p className="font-bold text-amber-300">{t('ناظمِ تعلیمات (تعلیمی شعبہ)', 'Academic Manager')}</p>
+                  <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">nazimtaleemat@demo.local</p>
                 </div>
                 <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
-                  <p className="font-bold text-amber-300">{t('۴. سرپرست (Parent)', '4. Parent')}</p>
-                  <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">parent@jamia.edu.pk</p>
+                  <p className="font-bold text-amber-300">{t('اساتذہ و کاؤنٹر و اولیاء', 'Teachers / Staff / Parents')}</p>
+                  <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">teacher@demo.local</p>
                 </div>
               </div>
               <p className="text-[10px] text-emerald-300/80 mt-2 font-mono">
@@ -340,33 +350,39 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
               </button>
             </div>
 
-            {/* Role Quick Selector Tabs (Only in Sign In mode to quickly populate institutional test credentials) */}
+            {/* Quick Presets for Institutional Authority testing */}
             {authMode === 'signin' ? (
               <div className="mb-5">
                 <label className="block text-xs font-semibold text-stone-700 mb-2">
-                  {t('کردار کا انتخاب کریں (Role Selector):', 'Select Institutional Role:')}
+                  {t('ادارہ جاتی منصب و کردار کا انتخاب (Institutional Presets):', 'Select Institutional Authority Preset:')}
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {(['mudeer', 'teacher', 'counter', 'parent'] as MmsRole[]).map((r) => {
-                    const isSelected = selectedRole === r;
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {[
+                    { key: 'muhtamim', labelUr: 'مہتممِ جامعہ', labelEn: 'Muhtamim', subUr: 'معائنہ و نگرانی', subEn: 'Oversight' },
+                    { key: 'nazim_aala', labelUr: 'ناظمِ اعلیٰ', labelEn: 'Nazim-e-Aala', subUr: 'چیف ایگزیکٹو', subEn: 'Chief Admin' },
+                    { key: 'departmental_nazim', labelUr: 'ناظمِ تعلیمات', labelEn: 'Academic Head', subUr: 'شعبہ تعلیمات', subEn: 'Academic Dept' },
+                    { key: 'teacher', labelUr: 'استاذِ جامعہ', labelEn: 'Teacher', subUr: 'کلاسز و حاضری', subEn: 'Faculty' },
+                    { key: 'counter', labelUr: 'کاؤنٹر کلرک', labelEn: 'Fee Counter', subUr: 'مالیات و کیش', subEn: 'Cashier' },
+                    { key: 'parent', labelUr: 'سرپرست طالب علم', labelEn: 'Parent', subUr: 'بچوں کا ریکارڈ', subEn: 'Guardian' },
+                  ].map((p) => {
+                    const isSelected = selectedPreset === p.key;
                     return (
                       <button
-                        key={r}
+                        key={p.key}
                         type="button"
-                        onClick={() => handleRoleSelect(r)}
-                        className={`px-2.5 py-2 rounded-xl text-center border text-xs font-semibold transition-all ${
+                        onClick={() => handleSelectPreset(p.key)}
+                        className={`px-2.5 py-2 rounded-xl text-start border text-xs font-semibold transition-all ${
                           isSelected
                             ? 'border-emerald-800 bg-emerald-50 text-emerald-900 shadow-xs ring-2 ring-emerald-700/20'
                             : 'border-stone-200 hover:border-stone-300 bg-stone-50/70 text-stone-700'
                         }`}
                       >
-                        <div className="font-bold truncate">
-                          {r === 'mudeer' && t('مہتمم', 'Mudeer')}
-                          {r === 'teacher' && t('استاذ', 'Teacher')}
-                          {r === 'counter' && t('کاؤنٹر', 'Counter')}
-                          {r === 'parent' && t('سرپرست', 'Parent')}
+                        <div className="font-bold truncate text-[11px]">
+                          {t(p.labelUr, p.labelEn)}
                         </div>
-                        <div className="text-[10px] text-stone-400 capitalize mt-0.5">{r}</div>
+                        <div className="text-[10px] text-stone-500 truncate mt-0.5">
+                          {t(p.subUr, p.subEn)}
+                        </div>
                       </button>
                     );
                   })}
@@ -555,43 +571,42 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
             <div className="space-y-4 text-xs text-stone-700 leading-relaxed">
               <p>
                 {t(
-                  'فیز ۲ کے لیے تیار کردہ ایس کیو ایل اسکرپٹ پروجیکٹ میں محفوظ ہے۔ اسے اپنے سپابیس ایس کیو ایل ایڈیٹر میں رن فرمائیں:',
-                  'The SQL migration script for Phase 2 is prepared in the codebase. Run it in your Supabase project SQL Editor:'
+                  'فیز ۲ و فیز ۴ کے لیے تیار کردہ ایس کیو ایل اسکرپٹس پروجیکٹ میں محفوظ ہیں۔ انہیں اپنے سپابیس ایس کیو ایل ایڈیٹر میں رن فرمائیں:',
+                  'The SQL migration scripts for Phase 2 and Phase 4 are prepared in the codebase. Run them in your Supabase project SQL Editor:'
                 )}
               </p>
 
-              <div className="bg-stone-900 text-stone-100 p-3 rounded-xl font-mono text-xs flex items-center justify-between">
-                <span>supabase/phase2_foundation.sql</span>
-                <button
-                  onClick={handleCopySqlPath}
-                  className="px-2.5 py-1 rounded bg-stone-800 hover:bg-stone-700 text-amber-300 text-[11px] flex items-center gap-1 transition-colors"
-                >
-                  {copiedSql ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                  <span>{copiedSql ? 'Copied' : 'Copy Path'}</span>
-                </button>
+              <div className="space-y-2">
+                <div className="bg-stone-900 text-stone-100 p-3 rounded-xl font-mono text-xs flex items-center justify-between">
+                  <span>supabase/phase4_institutional_authority.sql</span>
+                  <span className="text-amber-400 font-bold text-[10px] uppercase px-2 py-0.5 rounded bg-stone-800">
+                    Phase 4 Authority
+                  </span>
+                </div>
+                <div className="bg-stone-900 text-stone-100 p-3 rounded-xl font-mono text-xs flex items-center justify-between">
+                  <span>supabase/phase2_foundation.sql</span>
+                  <span className="text-emerald-400 font-bold text-[10px] uppercase px-2 py-0.5 rounded bg-stone-800">
+                    Phase 2 Core
+                  </span>
+                </div>
               </div>
 
               <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl">
                 <h4 className="font-bold text-emerald-900 mb-1">
-                  {t('اسکرپٹ میں شامل اجزاء (Features in SQL):', 'Schema Components:')}
+                  {t('فیز ۴ ادارہ جاتی ماڈل (Phase 4 Authority Schema):', 'Phase 4 Authority Schema Features:')}
                 </h4>
                 <ul className="list-disc list-inside space-y-1 text-emerald-800 text-[11px]">
                   <li>
-                    <strong>public.profiles</strong>: id (UUID), email, full_name, name_urdu, role (enum),
-                    designation, department, is_active.
+                    <strong>institutional_position enum</strong>: <code className="font-mono">muhtamim</code> (oversight/inspection), <code className="font-mono">nazim_aala</code> (chief operations), <code className="font-mono">departmental_nazim</code> (department manager), <code className="font-mono">teacher</code>, <code className="font-mono">counter</code>, <code className="font-mono">worker</code>, <code className="font-mono">parent</code>.
                   </li>
                   <li>
-                    <strong>mms_role enum</strong>: exactly 4 roles: <code className="font-mono">mudeer</code>,{' '}
-                    <code className="font-mono">teacher</code>, <code className="font-mono">counter</code>,{' '}
-                    <code className="font-mono">parent</code>.
+                    <strong>assigned_domain column</strong>: generic domain support (<code className="font-mono">academic</code>, <code className="font-mono">finance</code>, <code className="font-mono">all</code>).
                   </li>
                   <li>
-                    <strong>Row Level Security (RLS)</strong>: Users view & update own profile; Mudeer can view all
-                    profiles; no recursive loops.
+                    <strong>SECURITY DEFINER helper functions</strong>: <code className="font-mono">can_oversee_institution()</code>, <code className="font-mono">can_manage_operations()</code>, <code className="font-mono">can_manage_academic_domain()</code>, <code className="font-mono">can_read_academic_data()</code>.
                   </li>
                   <li>
-                    <strong>Automatic Trigger</strong>: Automatically populates <code className="font-mono">profiles</code>{' '}
-                    on auth signup.
+                    <strong>Non-recursive RLS</strong>: Zero recursive subqueries, strict anti-self-elevation policy, and operational protection against unauthorized modifications.
                   </li>
                 </ul>
               </div>

@@ -19,6 +19,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useMmsAuth } from '../context/MmsAuthContext';
 import { phase3Service } from '../services/phase3DataService';
 import {
   DbStudent,
@@ -35,6 +36,8 @@ interface MmsStudentsViewProps {
 
 export const MmsStudentsView: React.FC<MmsStudentsViewProps> = ({ onNavigateMms }) => {
   const { t } = useLanguage();
+  const { institutionalPosition, canManageAcademics, assignedDomain } = useMmsAuth();
+  const isMuhtamim = institutionalPosition === 'muhtamim';
 
   const [students, setStudents] = useState<StudentWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
@@ -277,13 +280,25 @@ export const MmsStudentsView: React.FC<MmsStudentsViewProps> = ({ onNavigateMms 
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs transition-colors shadow-xs"
-        >
-          <Plus className="w-4 h-4 text-amber-300" />
-          <span>{t('نیا طالب علم شامل کریں', 'Add New Student')}</span>
-        </button>
+        {canManageAcademics ? (
+          <button
+            onClick={handleOpenAdd}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs transition-colors shadow-xs"
+          >
+            <Plus className="w-4 h-4 text-amber-300" />
+            <span>{t('نیا طالب علم شامل کریں', 'Add New Student')}</span>
+          </button>
+        ) : isMuhtamim ? (
+          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold shadow-2xs">
+            <Eye className="w-4 h-4 text-amber-700" />
+            <span>{t('نگرانی و معائنہ — صرف مطالعہ (Read-Only)', 'Institutional Oversight — Read-Only Inspection')}</span>
+          </div>
+        ) : (
+          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-100 border border-stone-200 text-stone-700 text-xs font-semibold">
+            <Shield className="w-4 h-4 text-stone-500" />
+            <span>{t(`دائرہ کار: ${assignedDomain || 'غیر تعلیمی'} (صرف معائنہ)`, `Scope: ${assignedDomain || 'Non-academic'} (Inspection Only)`)}</span>
+          </div>
+        )}
       </div>
 
       {/* Feedback Banner */}
@@ -385,7 +400,7 @@ export const MmsStudentsView: React.FC<MmsStudentsViewProps> = ({ onNavigateMms 
                   <th className="px-4 py-3 text-start">{t('فعال کلاس', 'Active Class')}</th>
                   <th className="px-4 py-3 text-start">{t('سرپرست', 'Guardian')}</th>
                   <th className="px-4 py-3 text-start">{t('اسٹیٹس', 'Status')}</th>
-                  <th className="px-4 py-3 text-end">{t('اقدامات', 'Actions')}</th>
+                  <th className="px-4 py-3 text-end">{canManageAcademics ? t('اقدامات', 'Actions') : t('معائنہ', 'Inspection')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -467,20 +482,24 @@ export const MmsStudentsView: React.FC<MmsStudentsViewProps> = ({ onNavigateMms 
                           >
                             <Eye className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => handleOpenEdit(student)}
-                            title={t('ترمیم کریں', 'Edit')}
-                            className="p-1.5 rounded-lg text-stone-500 hover:text-amber-700 hover:bg-amber-50 transition-colors"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(student)}
-                            title={t('خارج کریں', 'Delete / Archive')}
-                            className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {canManageAcademics && (
+                            <>
+                              <button
+                                onClick={() => handleOpenEdit(student)}
+                                title={t('ترمیم کریں', 'Edit')}
+                                className="p-1.5 rounded-lg text-stone-500 hover:text-amber-700 hover:bg-amber-50 transition-colors"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(student)}
+                                title={t('خارج کریں', 'Delete / Archive')}
+                                className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -755,22 +774,24 @@ export const MmsStudentsView: React.FC<MmsStudentsViewProps> = ({ onNavigateMms 
                   <span>{t('منسلک اولیاء کرام و سرپرست (Guardians)', 'Linked Guardians')}</span>
                 </h3>
 
-                <button
-                  onClick={() => {
-                    setGuardianForm({
-                      guardian_id: availableGuardians[0]?.id || '',
-                      relationship: 'والد (Father)',
-                      is_primary: true,
-                      can_pickup: true,
-                      notes: '',
-                    });
-                    setIsLinkGuardianModalOpen(true);
-                  }}
-                  className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold flex items-center gap-1 transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>{t('سرپرست منسلک کریں', 'Link Guardian')}</span>
-                </button>
+                {canManageAcademics && (
+                  <button
+                    onClick={() => {
+                      setGuardianForm({
+                        guardian_id: availableGuardians[0]?.id || '',
+                        relationship: 'والد (Father)',
+                        is_primary: true,
+                        can_pickup: true,
+                        notes: '',
+                      });
+                      setIsLinkGuardianModalOpen(true);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold flex items-center gap-1 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{t('سرپرست منسلک کریں', 'Link Guardian')}</span>
+                  </button>
+                )}
               </div>
 
               {selectedStudent.guardians && selectedStudent.guardians.length > 0 ? (
@@ -798,13 +819,15 @@ export const MmsStudentsView: React.FC<MmsStudentsViewProps> = ({ onNavigateMms 
                         </div>
                       </div>
 
-                      <button
-                        onClick={() => handleUnlinkGuardian(link.id)}
-                        className="text-stone-400 hover:text-rose-600 p-1 rounded-md"
-                        title={t('تعلق ختم کریں', 'Unlink')}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {canManageAcademics && (
+                        <button
+                          onClick={() => handleUnlinkGuardian(link.id)}
+                          className="text-stone-400 hover:text-rose-600 p-1 rounded-md"
+                          title={t('تعلق ختم کریں', 'Unlink')}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>

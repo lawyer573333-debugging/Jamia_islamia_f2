@@ -1,22 +1,75 @@
-import { MmsUser, MmsRole, MmsNavItem } from '../types';
+import { MmsUser, MmsRole, InstitutionalPosition, MmsNavItem } from '../types';
 
-export const DEMO_CREDENTIALS = [
+export interface DemoCredentialItem {
+  role: MmsRole;
+  position: InstitutionalPosition;
+  domain?: string | null;
+  email: string;
+  password: string;
+  nameUrdu: string;
+  nameEnglish: string;
+  designationUrdu: string;
+  designationEnglish: string;
+  departmentUrdu: string;
+  departmentEnglish: string;
+  redirectRoute: string;
+  descriptionUrdu: string;
+  descriptionEnglish: string;
+}
+
+export const DEMO_CREDENTIALS: DemoCredentialItem[] = [
   {
-    role: 'mudeer' as MmsRole,
-    email: 'mudeer@demo.local',
+    role: 'mudeer',
+    position: 'muhtamim',
+    domain: 'all',
+    email: 'muhtamim@demo.local',
+    password: 'Demo@123',
+    nameUrdu: 'مولانا قاضی عبد الرشید',
+    nameEnglish: 'Maulana Qazi Abdul Rasheed',
+    designationUrdu: 'مہتممِ جامعہ (ادارہ جاتی معائنہ و نگرانی)',
+    designationEnglish: 'Muhtamim (Institutional Oversight & Inspection)',
+    departmentUrdu: 'دفترِ اہتمام و صدارت',
+    departmentEnglish: 'Office of the Rector',
+    redirectRoute: 'mms_dashboard',
+    descriptionUrdu: 'ادارہ جاتی معائنہ، رپورٹس اور نگرانی (معمول کے اندراجات کے بغیر)',
+    descriptionEnglish: 'Institutional inspection and oversight console (read-only on routine operations)',
+  },
+  {
+    role: 'mudeer',
+    position: 'nazim_aala',
+    domain: 'all',
+    email: 'nazimaala@demo.local',
     password: 'Demo@123',
     nameUrdu: 'مولانا محمد عبد الرحمٰن',
     nameEnglish: 'Maulana Muhammad Abdul Rehman',
-    designationUrdu: 'مہتمم و ناظمِ اعلیٰ',
-    designationEnglish: 'Director & Muhtamim',
-    departmentUrdu: 'مرکزی انتظامیہ',
-    departmentEnglish: 'Central Administration',
+    designationUrdu: 'ناظمِ اعلیٰ (چیف ایگزیکٹو ایڈمنسٹریٹر)',
+    designationEnglish: 'Nazim-e-Aala (Chief Operational Authority)',
+    departmentUrdu: 'مرکزی نظامت',
+    departmentEnglish: 'Central Operations Directorate',
     redirectRoute: 'mms_dashboard',
-    descriptionUrdu: 'مکمل انتظامی اور مالیاتی اختیارات کے ساتھ تمام شعبہ جات کا ڈیش بورڈ',
-    descriptionEnglish: 'Full institutional administrative, financial and operational oversight',
+    descriptionUrdu: 'جامعہ کے انتظامی اختیارات، تمام شعبہ جات کی نگرانی اور ریکارڈز مینجمنٹ',
+    descriptionEnglish: 'Chief operational authority across all departments and records',
   },
   {
-    role: 'teacher' as MmsRole,
+    role: 'mudeer',
+    position: 'departmental_nazim',
+    domain: 'academic',
+    email: 'nazimtaleemat@demo.local',
+    password: 'Demo@123',
+    nameUrdu: 'مولانا مفتی عبد المتین',
+    nameEnglish: 'Maulana Mufti Abdul Mateen',
+    designationUrdu: 'ناظمِ شعبہ تعلیمات (Academic Head)',
+    designationEnglish: 'Head of Academic Affairs',
+    departmentUrdu: 'شعبہ تعلیمات',
+    departmentEnglish: 'Academic Department',
+    redirectRoute: 'mms_dashboard',
+    descriptionUrdu: 'تعلیمی شعبے کے تمام ریکارڈز، کلاسز، داخلے اور طلباء کی مکمل نگرانی',
+    descriptionEnglish: 'Departmental manager scoped to academic foundation and student records',
+  },
+  {
+    role: 'teacher',
+    position: 'teacher',
+    domain: 'academic',
     email: 'teacher@demo.local',
     password: 'Demo@123',
     nameUrdu: 'مفتی قاری شبیر احمد',
@@ -30,7 +83,9 @@ export const DEMO_CREDENTIALS = [
     descriptionEnglish: 'Class timetable, student attendance, Hifz daily progress, lessons',
   },
   {
-    role: 'counter' as MmsRole,
+    role: 'counter',
+    position: 'counter',
+    domain: 'finance',
     email: 'counter@demo.local',
     password: 'Demo@123',
     nameUrdu: 'حافظ وقاص محمود',
@@ -44,7 +99,9 @@ export const DEMO_CREDENTIALS = [
     descriptionEnglish: 'Tuition fees, general donations, Zakat, Sadaqah, and instant receipts',
   },
   {
-    role: 'parent' as MmsRole,
+    role: 'parent',
+    position: 'parent',
+    domain: null,
     email: 'parent@demo.local',
     password: 'Demo@123',
     nameUrdu: 'چوہدری طارق عزیز',

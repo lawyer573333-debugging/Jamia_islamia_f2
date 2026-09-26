@@ -15,6 +15,7 @@ import {
   History,
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useMmsAuth } from '../context/MmsAuthContext';
 import { phase3Service } from '../services/phase3DataService';
 import {
   DbEnrollment,
@@ -30,6 +31,8 @@ interface MmsEnrollmentsViewProps {
 
 export const MmsEnrollmentsView: React.FC<MmsEnrollmentsViewProps> = ({ onNavigateMms }) => {
   const { t } = useLanguage();
+  const { institutionalPosition, canManageAcademics, assignedDomain } = useMmsAuth();
+  const isMuhtamim = institutionalPosition === 'muhtamim';
 
   const [enrollments, setEnrollments] = useState<EnrollmentWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
@@ -218,13 +221,25 @@ export const MmsEnrollmentsView: React.FC<MmsEnrollmentsViewProps> = ({ onNaviga
           </p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs transition-colors shadow-xs"
-        >
-          <Plus className="w-4 h-4 text-amber-300" />
-          <span>{t('نیا داخلہ درج کریں', 'New Enrollment')}</span>
-        </button>
+        {canManageAcademics ? (
+          <button
+            onClick={handleOpenCreate}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs transition-colors shadow-xs"
+          >
+            <Plus className="w-4 h-4 text-amber-300" />
+            <span>{t('نیا داخلہ درج کریں', 'New Enrollment')}</span>
+          </button>
+        ) : isMuhtamim ? (
+          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold shadow-2xs">
+            <Eye className="w-4 h-4 text-amber-700" />
+            <span>{t('نگرانی و معائنہ — صرف مطالعہ (Read-Only)', 'Institutional Oversight — Read-Only Inspection')}</span>
+          </div>
+        ) : (
+          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-100 border border-stone-200 text-stone-700 text-xs font-semibold">
+            <FileSpreadsheet className="w-4 h-4 text-stone-500" />
+            <span>{t(`دائرہ کار: ${assignedDomain || 'غیر تعلیمی'} (صرف معائنہ)`, `Scope: ${assignedDomain || 'Non-academic'} (Inspection Only)`)}</span>
+          </div>
+        )}
       </div>
 
       {/* Feedback Banner */}
@@ -319,7 +334,7 @@ export const MmsEnrollmentsView: React.FC<MmsEnrollmentsViewProps> = ({ onNaviga
                   <th className="px-4 py-3 text-start">{t('تعلیمی سال', 'Academic Year')}</th>
                   <th className="px-4 py-3 text-start">{t('تاریخِ داخلہ', 'Enrollment Date')}</th>
                   <th className="px-4 py-3 text-start">{t('کیفیت / اسٹیٹس', 'Status')}</th>
-                  <th className="px-4 py-3 text-end">{t('اقدامات', 'Actions')}</th>
+                  <th className="px-4 py-3 text-end">{canManageAcademics ? t('اقدامات', 'Actions') : t('معائنہ', 'Inspection')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -359,22 +374,28 @@ export const MmsEnrollmentsView: React.FC<MmsEnrollmentsViewProps> = ({ onNaviga
                       </span>
                     </td>
                     <td className="px-4 py-3 text-end">
-                      <div className="inline-flex items-center gap-1">
-                        <button
-                          onClick={() => handleOpenStatusModal(enr)}
-                          title={t('کیفیت تبدیل کریں', 'Update Status')}
-                          className="px-2 py-1 rounded-lg text-emerald-800 hover:bg-emerald-50 text-[11px] font-semibold border border-emerald-200 transition-colors"
-                        >
-                          {t('کیفیت تبدیل', 'Status')}
-                        </button>
-                        <button
-                          onClick={() => handleDeleteEnrollment(enr)}
-                          title={t('خارج کریں', 'Delete')}
-                          className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      {canManageAcademics ? (
+                        <div className="inline-flex items-center gap-1">
+                          <button
+                            onClick={() => handleOpenStatusModal(enr)}
+                            title={t('کیفیت تبدیل کریں', 'Update Status')}
+                            className="px-2 py-1 rounded-lg text-emerald-800 hover:bg-emerald-50 text-[11px] font-semibold border border-emerald-200 transition-colors"
+                          >
+                            {t('کیفیت تبدیل', 'Status')}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEnrollment(enr)}
+                            title={t('خارج کریں', 'Delete')}
+                            className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-stone-400 italic text-[11px]">
+                          {t('صرف مطالعہ', 'Read-only')}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}

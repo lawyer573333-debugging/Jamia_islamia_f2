@@ -11,6 +11,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useMmsAuth } from '../context/MmsAuthContext';
 import { phase3Service } from '../services/phase3DataService';
 import {
   DbClass,
@@ -25,6 +26,8 @@ interface MmsClassSubjectsViewProps {
 
 export const MmsClassSubjectsView: React.FC<MmsClassSubjectsViewProps> = ({ onNavigateMms }) => {
   const { t } = useLanguage();
+  const { institutionalPosition, canManageAcademics, assignedDomain } = useMmsAuth();
+  const isMuhtamim = institutionalPosition === 'muhtamim';
 
   const [classes, setClasses] = useState<DbClass[]>([]);
   const [subjects, setSubjects] = useState<DbSubject[]>([]);
@@ -171,14 +174,26 @@ export const MmsClassSubjectsView: React.FC<MmsClassSubjectsViewProps> = ({ onNa
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAssignModal}
-          disabled={!selectedClassId}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs transition-colors shadow-xs disabled:opacity-50"
-        >
-          <Plus className="w-4 h-4 text-amber-300" />
-          <span>{t('کلاس میں نیا مضمون تفویض کریں', 'Assign Subject to Class')}</span>
-        </button>
+        {canManageAcademics ? (
+          <button
+            onClick={handleOpenAssignModal}
+            disabled={!selectedClassId}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs transition-colors shadow-xs disabled:opacity-50"
+          >
+            <Plus className="w-4 h-4 text-amber-300" />
+            <span>{t('کلاس میں نیا مضمون تفویض کریں', 'Assign Subject to Class')}</span>
+          </button>
+        ) : isMuhtamim ? (
+          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold shadow-2xs">
+            <BookmarkCheck className="w-4 h-4 text-amber-700" />
+            <span>{t('نگرانی و معائنہ — صرف مطالعہ (Read-Only)', 'Institutional Oversight — Read-Only Inspection')}</span>
+          </div>
+        ) : (
+          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-100 border border-stone-200 text-stone-700 text-xs font-semibold">
+            <Filter className="w-4 h-4 text-stone-500" />
+            <span>{t(`دائرہ کار: ${assignedDomain || 'غیر تعلیمی'} (صرف معائنہ)`, `Scope: ${assignedDomain || 'Non-academic'} (Inspection Only)`)}</span>
+          </div>
+        )}
       </div>
 
       {/* Feedback Banner */}
@@ -261,13 +276,15 @@ export const MmsClassSubjectsView: React.FC<MmsClassSubjectsViewProps> = ({ onNa
             <p className="font-semibold text-sm text-stone-700">
               {t('اس کلاس میں کوئی مضمون شامل نہیں ہے', 'No subjects assigned to this class yet')}
             </p>
-            <button
-              onClick={handleOpenAssignModal}
-              className="mt-3 px-3 py-1.5 rounded-xl bg-emerald-800 text-white font-semibold text-xs inline-flex items-center gap-1.5"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>{t('پہلا مضمون تفویض کریں', 'Assign First Subject')}</span>
-            </button>
+            {canManageAcademics && (
+              <button
+                onClick={handleOpenAssignModal}
+                className="mt-3 px-3 py-1.5 rounded-xl bg-emerald-800 text-white font-semibold text-xs inline-flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{t('پہلا مضمون تفویض کریں', 'Assign First Subject')}</span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -278,7 +295,7 @@ export const MmsClassSubjectsView: React.FC<MmsClassSubjectsViewProps> = ({ onNa
                   <th className="px-4 py-3 text-start">{t('نام کتاب / مضمون', 'Subject Name')}</th>
                   <th className="px-4 py-3 text-start">{t('زمرہ', 'Category')}</th>
                   <th className="px-4 py-3 text-start">{t('مضمون استاذ (Subject Teacher)', 'Assigned Teacher')}</th>
-                  <th className="px-4 py-3 text-end">{t('اقدامات', 'Actions')}</th>
+                  <th className="px-4 py-3 text-end">{canManageAcademics ? t('اقدامات', 'Actions') : t('معائنہ', 'Inspection')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -311,14 +328,20 @@ export const MmsClassSubjectsView: React.FC<MmsClassSubjectsViewProps> = ({ onNa
                       )}
                     </td>
                     <td className="px-4 py-3 text-end">
-                      <button
-                        onClick={() => handleRemoveAssignment(asgn.id, asgn.subject.name)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-rose-700 hover:bg-rose-50 transition-colors text-xs font-semibold"
-                        title={t('تفویض ختم کریں', 'Remove assignment')}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>{t('ختم کریں', 'Remove')}</span>
-                      </button>
+                      {canManageAcademics ? (
+                        <button
+                          onClick={() => handleRemoveAssignment(asgn.id, asgn.subject.name)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-rose-700 hover:bg-rose-50 transition-colors text-xs font-semibold"
+                          title={t('تفویض ختم کریں', 'Remove assignment')}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>{t('ختم کریں', 'Remove')}</span>
+                        </button>
+                      ) : (
+                        <span className="text-stone-400 italic text-[11px]">
+                          {t('صرف معائنہ', 'Inspection')}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}

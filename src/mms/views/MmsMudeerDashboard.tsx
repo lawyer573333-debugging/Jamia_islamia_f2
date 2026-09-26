@@ -20,8 +20,10 @@ import {
   BookmarkCheck,
   Shield,
   Layers,
+  Eye,
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { useMmsAuth } from '../context/MmsAuthContext';
 import { MmsStatCard } from '../components/MmsStatCard';
 import { MmsModal } from '../components/MmsModal';
 import { MUDEER_DASHBOARD_DATA } from '../data/mockData';
@@ -33,10 +35,15 @@ interface MmsMudeerDashboardProps {
 
 export const MmsMudeerDashboard: React.FC<MmsMudeerDashboardProps> = ({ onNavigateMms }) => {
   const { t } = useLanguage();
+  const { user, institutionalPosition, assignedDomain, canOversee, canManageOperations, canManageAcademics } = useMmsAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'departments' | 'inventory'>('overview');
   const [quickModalOpen, setQuickModalOpen] = useState(false);
   const [modalAction, setModalAction] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const isMuhtamim = institutionalPosition === 'muhtamim';
+  const isNazimAala = institutionalPosition === 'nazim_aala' || (!isMuhtamim && institutionalPosition !== 'departmental_nazim' && canManageOperations);
+  const isDepartmental = institutionalPosition === 'departmental_nazim';
 
   // Phase 3 Live Counts
   const [phase3Counts, setPhase3Counts] = useState({
@@ -72,41 +79,123 @@ export const MmsMudeerDashboard: React.FC<MmsMudeerDashboardProps> = ({ onNaviga
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-2xl border border-stone-200 shadow-2xs">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl sm:text-2xl font-bold text-stone-900 font-h2">
-              {t('مہتمم / ناظمِ اعلیٰ ڈیش بورڈ', 'Director & Muhtamim Dashboard')}
+              {isMuhtamim
+                ? t('مہتممِ جامعہ — ادارہ جاتی معائنہ و نگرانی کنسول', 'Muhtamim Console — Institutional Inspection & Oversight')
+                : isNazimAala
+                ? t('ناظمِ اعلیٰ — مرکزی انتظامی و اختیاراتی کنسول', 'Nazim-e-Aala — Central Operational Command')
+                : isDepartmental
+                ? t(`ناظمِ شعبہ — اختیاراتی کنٹرول پینل`, `Departmental Manager — Authority Console`)
+                : t('مرکزی انتظامی ڈیش بورڈ', 'Director & Management Dashboard')}
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
-              {t('فیز ۳ — افراد و تعلیمی بنیاد', 'Phase 3: People & Academics')}
+            <span
+              className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                isMuhtamim
+                  ? 'bg-amber-100 text-amber-900 border-amber-300'
+                  : isNazimAala
+                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                  : 'bg-stone-100 text-stone-800 border-stone-300'
+              }`}
+            >
+              {isMuhtamim
+                ? t('نگرانی و معائنہ (Inspection Only)', 'Oversight & Inspection')
+                : isNazimAala
+                ? t('چیف ایگزیکٹو ایڈمنسٹریٹر', 'Chief Operational Authority')
+                : isDepartmental
+                ? t(`دائرہ کار: ${assignedDomain || 'تعلیمات'}`, `Domain: ${assignedDomain || 'Academic'}`)
+                : t('فیز ۳ — افراد و تعلیمی بنیاد', 'Phase 3: People & Academics')}
             </span>
           </div>
           <p className="text-xs text-stone-500 mt-1">
-            {t(
-              'طلباء، سرپرست، اساتذہ، کلاسز، نصاب اور داخلوں کا باضابطہ مرکزی کنٹرول روم۔',
-              'Central management console for students, guardians, faculty, classes, curriculum, and enrollments.'
-            )}
+            {isMuhtamim
+              ? t(
+                  'جامعہ کے جملہ شعبہ جات، تعلیمی کارکردگی، اساتذہ و طلباء کے اعداد و شمار کا خود مختار معائنہ۔ معمول کے انتظامی و دفتری اندراجات ناظمِ اعلیٰ اور متعلقہ شعبہ جات کے سپرد ہیں۔',
+                  'Autonomous institutional inspection and audit console for the Rector. Operational entries and records modification are delegated to Nazim-e-Aala and department managers.'
+                )
+              : isNazimAala
+              ? t(
+                  'جامعہ کے جملہ تعلیمی، تدریسی، دفتری اور انتظامی امور کا مرکزی کنٹرول روم مع جملہ انتظامی اختیارات۔',
+                  'Central operational command for institutional operations, admissions, curriculum, and staff management.'
+                )
+              : t(
+                  'طلباء، سرپرست، اساتذہ، کلاسز، نصاب اور داخلوں کا باضابطہ مرکزی کنٹرول روم۔',
+                  'Central management console for students, guardians, faculty, classes, curriculum, and enrollments.'
+                )}
           </p>
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons: Inspection-only vs Operational Management */}
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => onNavigateMms('mms_students')}
-            className="px-3.5 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-xs"
-          >
-            <PlusCircle className="w-4 h-4 text-amber-300" />
-            <span>{t('نیا داخلہ / طلباء', 'Students Module')}</span>
-          </button>
+          {isMuhtamim ? (
+            <>
+              <div className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-amber-700" />
+                <span>{t('حالت: معائنہ کار موڈ (Read-Only)', 'Status: Inspection Mode')}</span>
+              </div>
+              <button
+                onClick={() => onNavigateMms('mms_students')}
+                className="px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition-colors border border-stone-200 flex items-center gap-1.5"
+              >
+                <Users className="w-3.5 h-3.5 text-stone-600" />
+                <span>{t('معائنہ طلباء', 'Inspect Students')}</span>
+              </button>
+              <button
+                onClick={() => onNavigateMms('mms_teachers')}
+                className="px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition-colors border border-stone-200 flex items-center gap-1.5"
+              >
+                <GraduationCap className="w-3.5 h-3.5 text-stone-600" />
+                <span>{t('معائنہ اساتذہ', 'Inspect Faculty')}</span>
+              </button>
+            </>
+          ) : (
+            <>
+              {canManageAcademics && (
+                <button
+                  onClick={() => onNavigateMms('mms_students')}
+                  className="px-3.5 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-xs"
+                >
+                  <PlusCircle className="w-4 h-4 text-amber-300" />
+                  <span>{t('نیا داخلہ / طلباء', 'Students Module')}</span>
+                </button>
+              )}
 
-          <button
-            onClick={() => onNavigateMms('mms_enrollments')}
-            className="px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition-colors border border-stone-200 flex items-center gap-1.5"
-          >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-800" />
-            <span>{t('داخلہ و اندراج', 'Enrollments')}</span>
-          </button>
+              {canManageAcademics && (
+                <button
+                  onClick={() => onNavigateMms('mms_enrollments')}
+                  className="px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition-colors border border-stone-200 flex items-center gap-1.5"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-800" />
+                  <span>{t('داخلہ و اندراج', 'Enrollments')}</span>
+                </button>
+              )}
+            </>
+          )}
         </div>
       </div>
+
+      {/* Institutional Inspection Notice Banner for Muhtamim */}
+      {isMuhtamim && (
+        <div className="p-4 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-950 text-xs flex items-start gap-3 shadow-2xs">
+          <div className="p-2 rounded-xl bg-amber-100 text-amber-800 shrink-0">
+            <Eye className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-bold text-amber-900 text-sm mb-1 flex items-center gap-2">
+              <span>{t('ادارہ جاتی معائنہ و نگرانی گائیڈلائن (Muhtamim Inspection Mandate)', 'Institutional Oversight & Audit Mandate')}</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-950 font-mono">
+                {t('دستوری اصول', 'Statutory Policy')}
+              </span>
+            </h3>
+            <p className="leading-relaxed text-[11px] text-amber-900/90">
+              {t(
+                'بحیثیت مہتممِ جامعہ، آپ کو تمام اکیڈمک و دفتری ریکارڈز کا بلا روک ٹوک معائنہ و جائزہ لینے کا کامل اختیار حاصل ہے۔ ریکارڈز میں اندراج، ترمیم، منسوخی اور روزمرہ انتظامی اختیارات سیکیورٹی پالیسی اور منصب کی بنیاد پر ناظمِ اعلیٰ اور نامزد نظماء کے پاس محفوظ ہیں۔ اس کنسول میں تمام صفحات صرف مطالعہ و معائنہ (Read-Only) موڈ میں پیش کیے جاتے ہیں۔',
+                'As Muhtamim, you hold unimpeded inspection and audit authority across all institutional and academic records. Data entry, modification, deletion, and day-to-day administrative executions are strictly governed by institutional policy and delegated to Nazim-e-Aala and authorized department heads. All academic views are presented in read-only inspection mode.'
+              )}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* PHASE 3 MANDATORY SIMPLE COUNTS (Students, Guardians, Teachers, Classes, Subjects, Active Enrollments) */}
       <div className="space-y-3">

@@ -14,7 +14,7 @@ import { MmsSubjectsView } from './views/MmsSubjectsView';
 import { MmsClassSubjectsView } from './views/MmsClassSubjectsView';
 import { MmsEnrollmentsView } from './views/MmsEnrollmentsView';
 import { MmsPlaceholderView } from './views/MmsPlaceholderView';
-import { MmsRole } from './types';
+import { MmsRole, InstitutionalPosition, MmsUser } from './types';
 import { ShieldAlert, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -23,8 +23,23 @@ interface MmsAppProps {
   onNavigate: (route: string) => void;
 }
 
-// Helper to determine the authorized root dashboard for each role
-export function getRoleDefaultRoute(role: MmsRole): string {
+// Helper to determine the authorized root dashboard for each user/role
+export function getEffectiveDefaultRoute(
+  user?: MmsUser | null,
+  role?: MmsRole | null,
+  position?: InstitutionalPosition | null
+): string {
+  const effectivePosition = position || user?.institutionalPosition;
+  if (
+    user?.canOversee ||
+    effectivePosition === 'muhtamim' ||
+    effectivePosition === 'nazim_aala' ||
+    effectivePosition === 'departmental_nazim' ||
+    role === 'mudeer'
+  ) {
+    return 'mms_dashboard';
+  }
+
   switch (role) {
     case 'teacher':
       return 'mms_teacher';
@@ -32,15 +47,41 @@ export function getRoleDefaultRoute(role: MmsRole): string {
       return 'mms_counter';
     case 'parent':
       return 'mms_parent';
-    case 'mudeer':
     default:
       return 'mms_dashboard';
   }
 }
 
-// Strict route validation per role
-export function isRouteAllowedForRole(route: string, role: MmsRole): boolean {
+// Backward-compatible role route helper
+export function getRoleDefaultRoute(role: MmsRole): string {
+  return getEffectiveDefaultRoute(null, role);
+}
+
+// Strict route validation per user and institutional authority
+export function isRouteAllowedForUser(
+  route: string,
+  user: MmsUser | null,
+  role: MmsRole | null
+): boolean {
   if (route === 'mms_login') return true;
+
+  const hasInstitutionalAuthority = Boolean(
+    user?.canOversee ||
+    user?.institutionalPosition === 'muhtamim' ||
+    user?.institutionalPosition === 'nazim_aala' ||
+    user?.institutionalPosition === 'departmental_nazim' ||
+    role === 'mudeer'
+  );
+
+  if (hasInstitutionalAuthority) {
+    // Institutional leaders have full access to institutional management and academic foundation modules,
+    // but teacher/counter/parent personal desks remain role-specific
+    return (
+      !route.startsWith('mms_teacher') &&
+      !route.startsWith('mms_counter') &&
+      !route.startsWith('mms_parent')
+    );
+  }
 
   switch (role) {
     case 'teacher':
@@ -49,16 +90,14 @@ export function isRouteAllowedForRole(route: string, role: MmsRole): boolean {
       return route.startsWith('mms_counter');
     case 'parent':
       return route.startsWith('mms_parent');
-    case 'mudeer':
-      // Mudeer has access to institutional management routes, but teacher/counter/parent dashboards are role-specific
-      return (
-        !route.startsWith('mms_teacher') &&
-        !route.startsWith('mms_counter') &&
-        !route.startsWith('mms_parent')
-      );
     default:
       return false;
   }
+}
+
+// Backward-compatible role check helper
+export function isRouteAllowedForRole(route: string, role: MmsRole): boolean {
+  return isRouteAllowedForUser(route, null, role);
 }
 
 export const MmsApp: React.FC<MmsAppProps> = ({ currentView, onNavigate }) => {
@@ -66,23 +105,24 @@ export const MmsApp: React.FC<MmsAppProps> = ({ currentView, onNavigate }) => {
   const { t, isRtl } = useLanguage();
   const [accessDeniedRoute, setAccessDeniedRoute] = useState<string | null>(null);
 
-  // Redirect to role-appropriate dashboard upon login
-  const handleLoginSuccess = (userRole: MmsRole) => {
+  // Redirect to role/authority-appropriate dashboard upon login
+  const handleLoginSuccess = (userRole: MmsRole, position?: InstitutionalPosition) => {
     setAccessDeniedRoute(null);
-    onNavigate(getRoleDefaultRoute(userRole));
+    const targetRoute = getEffectiveDefaultRoute(user, userRole, position);
+    onNavigate(targetRoute);
   };
 
-  // Enforce role isolation whenever route or role changes
+  // Enforce role & institutional authority isolation whenever route, user, or role changes
   useEffect(() => {
     if (isAuthenticated && role && currentView.startsWith('mms_') && currentView !== 'mms_login') {
-      if (!isRouteAllowedForRole(currentView, role)) {
+      if (!isRouteAllowedForUser(currentView, user, role)) {
         setAccessDeniedRoute(currentView);
         // Automatically route back to authorized dashboard
-        const defaultRoute = getRoleDefaultRoute(role);
+        const defaultRoute = getEffectiveDefaultRoute(user, role);
         onNavigate(defaultRoute);
       }
     }
-  }, [currentView, isAuthenticated, role, onNavigate]);
+  }, [currentView, isAuthenticated, user, role, onNavigate]);
 
   // Loading state while restoring Supabase session
   if (isLoading) {
@@ -116,8 +156,8 @@ export const MmsApp: React.FC<MmsAppProps> = ({ currentView, onNavigate }) => {
     );
   }
 
-  // Check if current route is unauthorized for this authenticated role
-  const isAllowed = isRouteAllowedForRole(currentView, role);
+  // Check if current route is unauthorized for this authenticated user and institutional authority
+  const isAllowed = isRouteAllowedForUser(currentView, user, role);
   if (!isAllowed) {
     return (
       <MmsLayout
@@ -134,14 +174,14 @@ export const MmsApp: React.FC<MmsAppProps> = ({ currentView, onNavigate }) => {
           </h2>
           <p className="text-xs text-stone-600 mb-6 leading-relaxed">
             {t(
-              `آپ کا موجودہ کردار (${role}) اس ماڈیول تک رسائی کا مجاز نہیں ہے۔ سسٹم نے آپ کی حفاظت کے لیے رسائی مسدود کر دی ہے۔`,
-              `Your current authenticated role (${role}) is not authorized to access this module. Access has been restricted by institutional security policy.`
+              `آپ کا موجودہ منصب یا کردار اس ماڈیول تک رسائی کا مجاز نہیں ہے۔ سسٹم نے آپ کی حفاظت کے لیے رسائی مسدود کر دی ہے۔`,
+              `Your current position or role is not authorized to access this module. Access has been restricted by institutional security policy.`
             )}
           </p>
           <button
             onClick={() => {
               setAccessDeniedRoute(null);
-              onNavigate(getRoleDefaultRoute(role));
+              onNavigate(getEffectiveDefaultRoute(user, role));
             }}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-800 text-white font-bold text-xs hover:bg-emerald-900 transition-colors shadow-sm"
           >

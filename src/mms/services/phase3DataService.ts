@@ -671,23 +671,62 @@ function generateId(): string {
   return 'id-' + Math.random().toString(36).substring(2, 9) + '-' + Date.now().toString(36);
 }
 
-// Enforce defense-in-depth authorization check for mutations
-function checkMudeerPermission(): { allowed: boolean; error?: string } {
+// Phase 4 Institutional Authority Check:
+// Authority to modify people and academic foundation records:
+// Allowed:
+//   - Nazim-e-Aala (Chief operational authority)
+//   - Departmental Nazim with domain = 'academic'
+//   - Legacy 'mudeer' (resolving to Nazim-e-Aala)
+// Explicitly BLOCKED:
+//   - Muhtamim (Oversight and inspection only, no routine operational CRUD)
+//   - Teacher, Counter, Parent
+export function checkAcademicAuthorityPermission(): { allowed: boolean; error?: string } {
   try {
     const raw = localStorage.getItem('jamia_demo_auth_user');
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed?.user?.role && parsed.user.role !== 'mudeer') {
+      const position = parsed?.user?.institutionalPosition || (parsed?.user?.role === 'mudeer' ? 'nazim_aala' : parsed?.user?.role);
+      const domain = parsed?.user?.assignedDomain;
+
+      // 1. Muhtamim inspection restriction: oversight only, no routine operational CRUD
+      if (position === 'muhtamim') {
         return {
           allowed: false,
-          error: 'صرف مہتمم (Mudeer) کو ادارہ جاتی ریکارڈز تبدیل یا حذف کرنے کی اجازت ہے۔ (Unauthorized: Only Mudeer can modify institutional records)',
+          error: 'مہتممِ جامعہ کا منصب ادارہ جاتی معائنہ اور نگرانی کا ہے۔ معمول کے دفتری اندراجات ناظمِ اعلیٰ یا ناظمِ تعلیمات کے دائرہ اختیار میں آتے ہیں۔ (Muhtamim has oversight and inspection authority only. Routine operational changes are managed by Nazim-e-Aala or Academic Head.)',
         };
       }
+
+      // 2. Departmental Nazim must be scoped to academic domain
+      if (position === 'departmental_nazim') {
+        if (domain && domain !== 'academic' && domain !== 'all') {
+          return {
+            allowed: false,
+            error: 'آپ کا منصب اس شعبے (تعلیمات) کے ریکارڈز میں ردوبدل کا مجاز نہیں ہے۔ (Unauthorized: Departmental manager not scoped to academic domain)',
+          };
+        }
+        return { allowed: true };
+      }
+
+      // 3. Chief Operational Authority / Legacy Mudeer
+      if (position === 'nazim_aala' || parsed?.user?.role === 'mudeer') {
+        return { allowed: true };
+      }
+
+      // 4. Other roles blocked from managing academic master records
+      return {
+        allowed: false,
+        error: 'آپ کے اکاؤنٹ کو تعلیمی و ادارہ جاتی ماسٹر ریکارڈز تبدیل یا حذف کرنے کے اختیارات حاصل نہیں ہیں۔ (Unauthorized to modify academic records)',
+      };
     }
   } catch {
     // ignore
   }
   return { allowed: true };
+}
+
+// Backward-compatible bridge used across existing Phase 3 service methods
+function checkMudeerPermission(): { allowed: boolean; error?: string } {
+  return checkAcademicAuthorityPermission();
 }
 
 // ============================================================================

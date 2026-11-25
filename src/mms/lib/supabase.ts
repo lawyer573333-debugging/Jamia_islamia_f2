@@ -12,11 +12,14 @@ export const isSupabaseConfigured = Boolean(
   !supabaseUrl.includes('YOUR_PROJECT_URL')
 );
 
-// Demo mode is ONLY allowed during local development (import.meta.env.DEV)
+// Demo mode is ONLY allowed during local development (import.meta.env.DEV and MODE === 'development')
 // AND when VITE_DEMO_MODE is explicitly set to 'true'.
-// Production builds always evaluate import.meta.env.DEV as false, preventing insecure fallback.
+// Production builds (vite build) always set MODE === 'production', preventing demo fallback even if NODE_ENV=development is set in the shell.
 export const isDemoModeAllowed =
-  import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true';
+  import.meta.env.DEV &&
+  !import.meta.env.PROD &&
+  import.meta.env.MODE === 'development' &&
+  import.meta.env.VITE_DEMO_MODE === 'true';
 
 if (!isSupabaseConfigured) {
   console.warn(
@@ -30,9 +33,9 @@ export const supabase = createClient(
   supabasePublishableKey || 'placeholder-key',
   {
     auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
+      persistSession: isSupabaseConfigured,
+      autoRefreshToken: isSupabaseConfigured,
+      detectSessionInUrl: isSupabaseConfigured,
       storageKey: 'jamia_mms_supabase_auth_token',
     },
   }

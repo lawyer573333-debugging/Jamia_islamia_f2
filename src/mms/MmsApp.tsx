@@ -108,7 +108,7 @@ export const MmsApp: React.FC<MmsAppProps> = ({ currentView, onNavigate }) => {
   // Redirect to role/authority-appropriate dashboard upon login
   const handleLoginSuccess = (userRole: MmsRole, position?: InstitutionalPosition) => {
     setAccessDeniedRoute(null);
-    const targetRoute = getEffectiveDefaultRoute(user, userRole, position);
+    const targetRoute = getEffectiveDefaultRoute(null, userRole, position);
     onNavigate(targetRoute);
   };
 

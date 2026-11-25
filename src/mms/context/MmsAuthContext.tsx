@@ -368,23 +368,38 @@ export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     initAuth();
 
-    // Subscribe to auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+    if (!isSupabaseConfigured) {
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    // Subscribe to auth state changes only when Supabase is configured.
+    // INITIAL_SESSION is handled by initAuth() above so isLoading stays true until profile loading completes.
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (!isMounted) return;
+
+      if (event === 'INITIAL_SESSION') {
+        return;
+      }
 
       setSession(newSession);
 
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         if (newSession?.user) {
-          await fetchAndSetProfile(newSession.user.id, newSession.user.email);
+          const authUserId = newSession.user.id;
+          const authUserEmail = newSession.user.email;
+          setTimeout(() => {
+            if (isMounted) {
+              void fetchAndSetProfile(authUserId, authUserEmail);
+            }
+          }, 0);
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setProfile(null);
         setRole(null);
       }
-
-      setIsLoading(false);
     });
 
     return () => {
@@ -461,12 +476,17 @@ export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (!userProfile) {
         // Sign out if profile not found or deactivated
         await supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        setRole(null);
         return {
           success: false,
           error: 'صارف کا پروفائل یا کردار (Role) دستیاب نہیں یا اکاؤنٹ غیر فعال ہے۔ براہ کرم سپابیس میں profiles ٹیبل چیک کریں۔ (Profile not found or deactivated in database)',
         };
       }
 
+      setSession(data.session ?? null);
       const effectivePosition = resolveInstitutionalPosition(userProfile);
 
       return {

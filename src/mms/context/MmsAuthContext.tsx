@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { MmsUser, MmsRole, InstitutionalPosition, SupabaseProfile } from '../types/index';
 import { supabase, isSupabaseConfigured, isDemoModeAllowed } from '../lib/supabase';
+import { DEMO_CREDENTIALS, DemoCredentialItem } from '../data/mockData';
 import type { Session } from '@supabase/supabase-js';
 
 export interface MmsAuthContextType {
@@ -157,6 +158,57 @@ function profileToMmsUser(profile: SupabaseProfile): MmsUser {
   };
 }
 
+// Internal development-only helper to map an allowlisted demo account into session state.
+// Never used when Supabase is configured or in production builds.
+function buildDemoSessionFromCredential(cred: DemoCredentialItem): {
+  user: MmsUser;
+  profile: SupabaseProfile;
+} {
+  const demoDomain = cred.domain ?? null;
+  const canOversee = cred.position === 'muhtamim' || cred.position === 'nazim_aala';
+  const canManageOperations = cred.position === 'nazim_aala';
+  const canManageAcademics =
+    canManageOperations ||
+    (cred.position === 'departmental_nazim' && (demoDomain === 'academic' || demoDomain === 'all'));
+
+  const mockUser: MmsUser = {
+    id: cred.id,
+    nameEnglish: cred.nameEnglish,
+    nameUrdu: cred.nameUrdu,
+    email: cred.email.toLowerCase(),
+    role: cred.role,
+    institutionalPosition: cred.position,
+    assignedDomain: demoDomain,
+    canOversee,
+    canManageOperations,
+    canManageAcademics,
+    designationEnglish: cred.designationEnglish,
+    designationUrdu: cred.designationUrdu,
+    departmentEnglish: cred.departmentEnglish,
+    departmentUrdu: cred.departmentUrdu,
+    isActive: true,
+  };
+
+  const mockProfile: SupabaseProfile = {
+    id: cred.id,
+    email: cred.email.toLowerCase(),
+    full_name: cred.nameEnglish,
+    name_urdu: cred.nameUrdu,
+    role: cred.role,
+    institutional_position: cred.position,
+    assigned_domain: demoDomain,
+    designation_english: cred.designationEnglish,
+    designation_urdu: cred.designationUrdu,
+    department_english: cred.departmentEnglish,
+    department_urdu: cred.departmentUrdu,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  return { user: mockUser, profile: mockProfile };
+}
+
 export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<SupabaseProfile | null>(null);
@@ -244,26 +296,44 @@ export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ child
     let isMounted = true;
 
     const initAuth = async () => {
-      if (!isSupabaseConfigured && isDemoModeAllowed) {
-        try {
-          const stored = localStorage.getItem('jamia_demo_auth_user');
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            if (parsed.user && parsed.profile) {
-              setUser(parsed.user);
-              setProfile(parsed.profile);
-              setRole(parsed.user.role);
-            }
-          }
-        } catch (e) {
-          console.error('[MMS Auth] Failed to restore local demo user:', e);
-        } finally {
-          setIsLoading(false);
-        }
-        return;
-      }
-
       if (!isSupabaseConfigured) {
+        if (isDemoModeAllowed) {
+          try {
+            const stored = localStorage.getItem('jamia_demo_auth_user');
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              const storedEmail =
+                typeof parsed?.user?.email === 'string' ? parsed.user.email.trim().toLowerCase() : '';
+              const matchedDemo = DEMO_CREDENTIALS.find(
+                (cred) => cred.email.toLowerCase() === storedEmail
+              );
+
+              if (matchedDemo) {
+                const { user: restoredUser, profile: restoredProfile } =
+                  buildDemoSessionFromCredential(matchedDemo);
+                setUser(restoredUser);
+                setProfile(restoredProfile);
+                setRole(restoredUser.role);
+              } else {
+                localStorage.removeItem('jamia_demo_auth_user');
+                setUser(null);
+                setProfile(null);
+                setRole(null);
+              }
+            }
+          } catch (e) {
+            console.error('[MMS Auth] Failed to restore local demo user:', e);
+            try {
+              localStorage.removeItem('jamia_demo_auth_user');
+            } catch {
+              // ignore
+            }
+          } finally {
+            setIsLoading(false);
+          }
+          return;
+        }
+
         setUser(null);
         setProfile(null);
         setRole(null);
@@ -323,130 +393,35 @@ export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
   }, [fetchAndSetProfile]);
 
-  // Real Supabase login with email & password (with demo fallback if credentials not configured)
+  // Real Supabase login with email & password.
+  // Local development demo login is strictly restricted to !isSupabaseConfigured && isDemoModeAllowed.
   const login = async (
     email: string,
     password: string
   ): Promise<{ success: boolean; error?: string; role?: MmsRole; position?: InstitutionalPosition }> => {
-    if (!isSupabaseConfigured && isDemoModeAllowed) {
-      const trimmedEmail = email.trim().toLowerCase();
-      let demoRole: MmsRole = 'parent';
-      let demoPosition: InstitutionalPosition = 'parent';
-      let demoDomain: string | null = null;
-      let nameEn = 'Chaudhry Tariq Aziz';
-      let nameUr = 'چوہدری طارق عزیز';
-      let desigEn = 'Parent / Guardian';
-      let desigUr = 'سرپرست طالب علم';
-      let deptEn = 'Parents Portal';
-      let deptUr = 'اولیاء کرام پورٹل';
-      let demoId = '44444444-4444-4444-4444-444444444444';
-
-      if (trimmedEmail.includes('muhtamim')) {
-        demoRole = 'mudeer';
-        demoPosition = 'muhtamim';
-        demoDomain = 'all';
-        nameEn = 'Maulana Qazi Abdul Rasheed';
-        nameUr = 'مولانا قاضی عبد الرشید';
-        desigEn = 'Muhtamim (Institutional Oversight & Inspection)';
-        desigUr = 'مہتممِ جامعہ (ادارہ جاتی معائنہ و نگرانی)';
-        deptEn = 'Office of the Rector';
-        deptUr = 'دفترِ اہتمام و صدارت';
-        demoId = '00000000-0000-0000-0000-000000000001';
-      } else if (trimmedEmail.includes('nazim') && (trimmedEmail.includes('aala') || !trimmedEmail.includes('taleemat'))) {
-        demoRole = 'mudeer';
-        demoPosition = 'nazim_aala';
-        demoDomain = 'all';
-        nameEn = 'Maulana Muhammad Abdul Rehman';
-        nameUr = 'مولانا محمد عبد الرحمٰن';
-        desigEn = 'Nazim-e-Aala (Chief Operational Authority)';
-        desigUr = 'ناظمِ اعلیٰ (چیف ایگزیکٹو ایڈمنسٹریٹر)';
-        deptEn = 'Central Operations Directorate';
-        deptUr = 'مرکزی نظامت';
-        demoId = '11111111-1111-1111-1111-111111111111';
-      } else if (trimmedEmail.includes('taleemat') || trimmedEmail.includes('academic')) {
-        demoRole = 'mudeer';
-        demoPosition = 'departmental_nazim';
-        demoDomain = 'academic';
-        nameEn = 'Maulana Mufti Abdul Mateen';
-        nameUr = 'مولانا مفتی عبد المتین';
-        desigEn = 'Head of Academic Affairs';
-        desigUr = 'ناظمِ شعبہ تعلیمات';
-        deptEn = 'Academic Department';
-        deptUr = 'شعبہ تعلیمات';
-        demoId = '11111111-1111-1111-1111-111111111112';
-      } else if (trimmedEmail.includes('mudeer')) {
-        // Legacy mudeer alias resolves conservatively to Nazim-e-Aala for operational continuity
-        demoRole = 'mudeer';
-        demoPosition = 'nazim_aala';
-        demoDomain = 'all';
-        nameEn = 'Maulana Muhammad Abdul Rehman';
-        nameUr = 'مولانا محمد عبد الرحمٰن';
-        desigEn = 'Director & Nazim-e-Aala';
-        desigUr = 'ناظمِ اعلیٰ و مہتمم';
-        deptEn = 'Central Administration';
-        deptUr = 'مرکزی انتظامیہ';
-        demoId = '11111111-1111-1111-1111-111111111111';
-      } else if (trimmedEmail.includes('teacher')) {
-        demoRole = 'teacher';
-        demoPosition = 'teacher';
-        demoDomain = 'academic';
-        nameEn = 'Mufti Qari Shabbir Ahmad';
-        nameUr = 'مفتی قاری شبیر احمد';
-        desigEn = 'Hadith Lecturer & Hifz Supervisor';
-        desigUr = 'استاذِ حدیث و نگراں شعبہ حفظ';
-        deptEn = 'Dars-e-Nizami & Hifz Department';
-        deptUr = 'درسِ نظامی و شعبہ حفظ';
-        demoId = '22222222-2222-2222-2222-222222222222';
-      } else if (trimmedEmail.includes('counter')) {
-        demoRole = 'counter';
-        demoPosition = 'counter';
-        demoDomain = 'finance';
-        nameEn = 'Hafiz Waqas Mahmood';
-        nameUr = 'حافظ وقاص محمود';
-        desigEn = 'Accounts Clerk & Cashier';
-        desigUr = 'اکاؤنٹس کلرک و فیس انچارج';
-        deptEn = 'Finance & Fee Counter';
-        deptUr = 'شعبہ مالیات و فیس کاؤنٹر';
-        demoId = '33333333-3333-3333-3333-333333333333';
+    if (!isSupabaseConfigured) {
+      if (!isDemoModeAllowed) {
+        return {
+          success: false,
+          error: 'سپابیس (Supabase) کنفیگر نہیں ہے اور ڈیمو موڈ غیر فعال ہے۔ براہ کرم Supabase کی ترتیبات مکمل کریں۔ (Supabase is not configured and demo mode is disabled.)',
+        };
       }
 
-      const canOversee = demoPosition === 'muhtamim' || demoPosition === 'nazim_aala';
-      const canManageOperations = demoPosition === 'nazim_aala';
-      const canManageAcademics = canManageOperations || (demoPosition === 'departmental_nazim' && (demoDomain === 'academic' || demoDomain === 'all'));
+      const trimmedEmail = email.trim().toLowerCase();
+      const matchedDemo = DEMO_CREDENTIALS.find(
+        (cred) => cred.email.toLowerCase() === trimmedEmail
+      );
 
-      const mockUser: MmsUser = {
-        id: demoId,
-        nameEnglish: nameEn,
-        nameUrdu: nameUr,
-        email: trimmedEmail,
-        role: demoRole,
-        institutionalPosition: demoPosition,
-        assignedDomain: demoDomain,
-        canOversee,
-        canManageOperations,
-        canManageAcademics,
-        designationEnglish: desigEn,
-        designationUrdu: desigUr,
-        departmentEnglish: deptEn,
-        departmentUrdu: deptUr,
-        isActive: true,
-      };
-      const mockProfile: SupabaseProfile = {
-        id: demoId,
-        email: trimmedEmail,
-        full_name: nameEn,
-        name_urdu: nameUr,
-        role: demoRole,
-        institutional_position: demoPosition,
-        assigned_domain: demoDomain,
-        designation_english: desigEn,
-        designation_urdu: desigUr,
-        department_english: deptEn,
-        department_urdu: deptUr,
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+      // Require both an exact recognized demo email and its matching demo password.
+      // Reject arbitrary emails, missing passwords, and invalid credential pairs.
+      if (!trimmedEmail || !password || !matchedDemo || matchedDemo.password !== password) {
+        return {
+          success: false,
+          error: 'ای میل یا پاس ورڈ درست نہیں ہے۔ براہ کرم درست ڈیمو ای میل اور پاس ورڈ درج کریں۔ (Invalid demo email or password.)',
+        };
+      }
+
+      const { user: mockUser, profile: mockProfile } = buildDemoSessionFromCredential(matchedDemo);
 
       try {
         localStorage.setItem('jamia_demo_auth_user', JSON.stringify({ user: mockUser, profile: mockProfile }));
@@ -455,15 +430,8 @@ export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
       setUser(mockUser);
       setProfile(mockProfile);
-      setRole(demoRole);
-      return { success: true, role: demoRole, position: demoPosition };
-    }
-
-    if (!isSupabaseConfigured) {
-      return {
-        success: false,
-        error: 'سپابیس (Supabase) کنفیگر نہیں ہے اور ڈیمو موڈ غیر فعال ہے۔ براہ کرم Supabase کی ترتیبات مکمل کریں۔ (Supabase is not configured and demo mode is disabled.)',
-      };
+      setRole(mockUser.role);
+      return { success: true, role: mockUser.role, position: mockUser.institutionalPosition };
     }
 
     try {

@@ -1,6 +1,7 @@
 import { MmsUser, MmsRole, InstitutionalPosition, MmsNavItem } from '../types/index';
 
 export interface DemoCredentialItem {
+  id: string;
   role: MmsRole;
   position: InstitutionalPosition;
   domain?: string | null;
@@ -19,6 +20,7 @@ export interface DemoCredentialItem {
 
 export const DEMO_CREDENTIALS: DemoCredentialItem[] = [
   {
+    id: '00000000-0000-0000-0000-000000000001',
     role: 'mudeer',
     position: 'muhtamim',
     domain: 'all',
@@ -35,6 +37,7 @@ export const DEMO_CREDENTIALS: DemoCredentialItem[] = [
     descriptionEnglish: 'Institutional inspection and oversight console (read-only on routine operations)',
   },
   {
+    id: '11111111-1111-1111-1111-111111111111',
     role: 'mudeer',
     position: 'nazim_aala',
     domain: 'all',
@@ -51,6 +54,7 @@ export const DEMO_CREDENTIALS: DemoCredentialItem[] = [
     descriptionEnglish: 'Chief operational authority across all departments and records',
   },
   {
+    id: '11111111-1111-1111-1111-111111111112',
     role: 'mudeer',
     position: 'departmental_nazim',
     domain: 'academic',
@@ -67,6 +71,7 @@ export const DEMO_CREDENTIALS: DemoCredentialItem[] = [
     descriptionEnglish: 'Departmental manager scoped to academic foundation and student records',
   },
   {
+    id: '22222222-2222-2222-2222-222222222222',
     role: 'teacher',
     position: 'teacher',
     domain: 'academic',
@@ -83,6 +88,7 @@ export const DEMO_CREDENTIALS: DemoCredentialItem[] = [
     descriptionEnglish: 'Class timetable, student attendance, Hifz daily progress, lessons',
   },
   {
+    id: '33333333-3333-3333-3333-333333333333',
     role: 'counter',
     position: 'counter',
     domain: 'finance',
@@ -99,6 +105,7 @@ export const DEMO_CREDENTIALS: DemoCredentialItem[] = [
     descriptionEnglish: 'Tuition fees, general donations, Zakat, Sadaqah, and instant receipts',
   },
   {
+    id: '44444444-4444-4444-4444-444444444444',
     role: 'parent',
     position: 'parent',
     domain: null,

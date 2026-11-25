@@ -34,7 +34,7 @@ import {
 import { useLanguage } from '../../context/LanguageContext';
 import { useMmsAuth } from '../context/MmsAuthContext';
 import { ROLE_NAVIGATION } from '../data/mockData';
-import { MmsNavItem } from '../types';
+import { MmsNavItem } from '../types/index';
 
 interface MmsSidebarProps {
   currentRoute: string;

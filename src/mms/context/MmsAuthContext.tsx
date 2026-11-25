@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { MmsUser, MmsRole, InstitutionalPosition, SupabaseProfile } from '../types';
+import { MmsUser, MmsRole, InstitutionalPosition, SupabaseProfile } from '../types/index';
 import { supabase, isSupabaseConfigured, isDemoModeAllowed } from '../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 

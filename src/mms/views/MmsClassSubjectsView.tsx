@@ -18,7 +18,7 @@ import {
   DbSubject,
   DbTeacher,
   ClassSubjectWithDetails,
-} from '../types';
+} from '../types/index';
 
 interface MmsClassSubjectsViewProps {
   onNavigateMms: (route: string) => void;

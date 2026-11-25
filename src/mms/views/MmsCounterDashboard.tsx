@@ -21,7 +21,7 @@ import {
   DbGuardian,
   StudentWithDetails,
   EnrollmentWithDetails,
-} from '../types';
+} from '../types/index';
 
 interface MmsCounterDashboardProps {
   onNavigateMms: (route: string) => void;

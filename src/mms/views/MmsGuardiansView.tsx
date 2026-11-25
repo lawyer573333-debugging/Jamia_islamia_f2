@@ -18,7 +18,7 @@ import {
 import { useLanguage } from '../../context/LanguageContext';
 import { useMmsAuth } from '../context/MmsAuthContext';
 import { phase3Service } from '../services/phase3DataService';
-import { DbGuardian, GuardianWithStudents } from '../types';
+import { DbGuardian, GuardianWithStudents } from '../types/index';
 
 interface MmsGuardiansViewProps {
   onNavigateMms: (route: string) => void;

@@ -23,7 +23,7 @@ import { MmsStatCard } from '../components/MmsStatCard';
 import { MmsModal } from '../components/MmsModal';
 import { TEACHER_DASHBOARD_DATA } from '../data/mockData';
 import { phase3Service } from '../services/phase3DataService';
-import { DbClass, ClassSubjectWithDetails, EnrollmentWithDetails } from '../types';
+import { DbClass, ClassSubjectWithDetails, EnrollmentWithDetails } from '../types/index';
 
 interface MmsTeacherDashboardProps {
   onNavigateMms: (route: string) => void;

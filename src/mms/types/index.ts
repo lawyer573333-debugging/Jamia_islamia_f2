@@ -159,7 +159,7 @@ export interface DbGuardian {
   email?: string | null;
   address?: string | null;
   occupation?: string | null;
-  is_primary: boolean;
+  is_primary?: boolean;
   notes?: string | null;
   created_at: string;
   updated_at: string;
@@ -206,6 +206,7 @@ export interface DbClass {
   section: string;
   teacher_id?: string | null;
   capacity: number;
+  room_number?: string | null;
   status: ClassStatus;
   created_at: string;
   updated_at: string;

@@ -20,7 +20,7 @@ import {
   SubjectCategory,
   SubjectStatus,
   EnrollmentStatus,
-} from '../types';
+} from '../types/index';
 
 // Storage key for persistent demo mode data
 const STORAGE_KEY = 'jamia_mms_phase3_store';

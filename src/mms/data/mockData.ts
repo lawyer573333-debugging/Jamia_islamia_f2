@@ -1,4 +1,4 @@
-import { MmsUser, MmsRole, InstitutionalPosition, MmsNavItem } from '../types';
+import { MmsUser, MmsRole, InstitutionalPosition, MmsNavItem } from '../types/index';
 
 export interface DemoCredentialItem {
   role: MmsRole;

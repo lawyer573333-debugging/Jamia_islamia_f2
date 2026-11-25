@@ -19,7 +19,7 @@ import {
 import { useLanguage } from '../../context/LanguageContext';
 import { useMmsAuth } from '../context/MmsAuthContext';
 import { DEMO_CREDENTIALS } from '../data/mockData';
-import { MmsRole, InstitutionalPosition } from '../types';
+import { MmsRole, InstitutionalPosition } from '../types/index';
 
 interface MmsLoginViewProps {
   onLoginSuccess: (role: MmsRole, position?: InstitutionalPosition) => void;

@@ -78,10 +78,9 @@
 /* Subtle traditional Islamic geometric arabesque background pattern */
 .bg-islamic-pattern {
   background-color: #faf9f5;
-  background-image: radial-gradient(#065f46 0.75px, transparent 0.75px), radial-gradient(#065f46 0.75px, #faf9f5 0.75px);
+  background-image: radial-gradient(rgba(6, 95, 70, 0.06) 0.75px, transparent 0.75px), radial-gradient(rgba(6, 95, 70, 0.06) 0.75px, #faf9f5 0.75px);
   background-size: 30px 30px;
   background-position: 0 0, 15px 15px;
-  background-opacity: 0.05;
 }
 
 .bg-pattern-subtle {

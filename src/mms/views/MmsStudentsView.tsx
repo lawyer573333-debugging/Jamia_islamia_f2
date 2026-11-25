@@ -28,7 +28,7 @@ import {
   StudentGender,
   DbGuardian,
   DbClass,
-} from '../types';
+} from '../types/index';
 
 interface MmsStudentsViewProps {
   onNavigateMms: (route: string) => void;

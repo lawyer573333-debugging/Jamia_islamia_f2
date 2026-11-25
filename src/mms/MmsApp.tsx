@@ -14,7 +14,7 @@ import { MmsSubjectsView } from './views/MmsSubjectsView';
 import { MmsClassSubjectsView } from './views/MmsClassSubjectsView';
 import { MmsEnrollmentsView } from './views/MmsEnrollmentsView';
 import { MmsPlaceholderView } from './views/MmsPlaceholderView';
-import { MmsRole, InstitutionalPosition, MmsUser } from './types';
+import { MmsRole, InstitutionalPosition, MmsUser } from './types/index';
 import { ShieldAlert, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 

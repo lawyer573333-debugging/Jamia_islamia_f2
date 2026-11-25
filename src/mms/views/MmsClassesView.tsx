@@ -17,7 +17,7 @@ import {
 import { useLanguage } from '../../context/LanguageContext';
 import { useMmsAuth } from '../context/MmsAuthContext';
 import { phase3Service } from '../services/phase3DataService';
-import { DbClass, ClassWithDetails, DbTeacher, ClassStatus } from '../types';
+import { DbClass, ClassWithDetails, DbTeacher, ClassStatus } from '../types/index';
 
 interface MmsClassesViewProps {
   onNavigateMms: (route: string) => void;
@@ -300,7 +300,7 @@ export const MmsClassesView: React.FC<MmsClassesViewProps> = ({ onNavigateMms })
               <tbody className="divide-y divide-stone-100">
                 {classes.map((cls) => {
                   const studentCount = cls.enrolledStudents?.length || 0;
-                  const subjectCount = cls.subjects?.length || 0;
+                  const subjectCount = cls.assignedSubjects?.length || 0;
                   return (
                     <tr key={cls.id} className="hover:bg-stone-50/70 transition-colors">
                       <td className="px-4 py-3 font-mono font-bold text-emerald-800">{cls.code}</td>
@@ -648,7 +648,7 @@ export const MmsClassesView: React.FC<MmsClassesViewProps> = ({ onNavigateMms })
                 <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-1.5">
                   <BookmarkCheck className="w-4 h-4 text-emerald-800" />
                   <span>
-                    {t('نصابی مضامین و اساتذہ', 'Assigned Subjects')} ({selectedClass.subjects?.length || 0})
+                    {t('نصابی مضامین و اساتذہ', 'Assigned Subjects')} ({selectedClass.assignedSubjects?.length || 0})
                   </span>
                 </h3>
                 <button
@@ -659,9 +659,9 @@ export const MmsClassesView: React.FC<MmsClassesViewProps> = ({ onNavigateMms })
                 </button>
               </div>
 
-              {selectedClass.subjects && selectedClass.subjects.length > 0 ? (
+              {selectedClass.assignedSubjects && selectedClass.assignedSubjects.length > 0 ? (
                 <div className="space-y-2">
-                  {selectedClass.subjects.map((asgn) => (
+                  {selectedClass.assignedSubjects.map((asgn) => (
                     <div
                       key={asgn.id}
                       className="p-2.5 rounded-xl border border-stone-200 bg-white flex items-center justify-between text-xs"

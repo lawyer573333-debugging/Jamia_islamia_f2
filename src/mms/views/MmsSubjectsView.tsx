@@ -15,7 +15,7 @@ import {
 import { useLanguage } from '../../context/LanguageContext';
 import { useMmsAuth } from '../context/MmsAuthContext';
 import { phase3Service } from '../services/phase3DataService';
-import { DbSubject, SubjectCategory, SubjectStatus } from '../types';
+import { DbSubject, SubjectCategory, SubjectStatus } from '../types/index';
 
 interface MmsSubjectsViewProps {
   onNavigateMms: (route: string) => void;

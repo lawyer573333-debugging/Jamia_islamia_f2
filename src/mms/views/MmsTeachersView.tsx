@@ -18,7 +18,7 @@ import {
 import { useLanguage } from '../../context/LanguageContext';
 import { useMmsAuth } from '../context/MmsAuthContext';
 import { phase3Service } from '../services/phase3DataService';
-import { DbTeacher, TeacherWithAssignments, TeacherStatus } from '../types';
+import { DbTeacher, TeacherWithAssignments, TeacherStatus } from '../types/index';
 
 interface MmsTeachersViewProps {
   onNavigateMms: (route: string) => void;
@@ -310,9 +310,9 @@ export const MmsTeachersView: React.FC<MmsTeachersViewProps> = ({ onNavigateMms 
                       {teacher.phone}
                     </td>
                     <td className="px-4 py-3">
-                      {teacher.primaryClasses && teacher.primaryClasses.length > 0 ? (
+                      {teacher.classes && teacher.classes.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
-                          {teacher.primaryClasses.map((cls) => (
+                          {teacher.classes.map((cls) => (
                             <span
                               key={cls.id}
                               className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200 text-[11px] font-semibold"
@@ -602,9 +602,9 @@ export const MmsTeachersView: React.FC<MmsTeachersViewProps> = ({ onNavigateMms 
                 <span>{t('بطور نگران استاذ درجات (Class Teacher)', 'Supervised Classes')}</span>
               </h3>
 
-              {selectedTeacher.primaryClasses && selectedTeacher.primaryClasses.length > 0 ? (
+              {selectedTeacher.classes && selectedTeacher.classes.length > 0 ? (
                 <div className="space-y-2">
-                  {selectedTeacher.primaryClasses.map((cls) => (
+                  {selectedTeacher.classes.map((cls) => (
                     <div
                       key={cls.id}
                       className="p-3 rounded-xl border border-stone-200 bg-white flex items-center justify-between text-xs"
@@ -635,9 +635,9 @@ export const MmsTeachersView: React.FC<MmsTeachersViewProps> = ({ onNavigateMms 
                 <span>{t('تدریس کے مضامین (Assigned Subjects)', 'Teaching Subjects')}</span>
               </h3>
 
-              {selectedTeacher.teachingAssignments && selectedTeacher.teachingAssignments.length > 0 ? (
+              {selectedTeacher.assignedSubjects && selectedTeacher.assignedSubjects.length > 0 ? (
                 <div className="space-y-2">
-                  {selectedTeacher.teachingAssignments.map((asgn) => (
+                  {selectedTeacher.assignedSubjects.map((asgn) => (
                     <div
                       key={asgn.id}
                       className="p-3 rounded-xl border border-stone-200 bg-white flex items-center justify-between text-xs"

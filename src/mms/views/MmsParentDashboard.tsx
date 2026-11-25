@@ -22,7 +22,7 @@ import { useMmsAuth } from '../context/MmsAuthContext';
 import { MmsStatCard } from '../components/MmsStatCard';
 import { PARENT_DASHBOARD_DATA } from '../data/mockData';
 import { phase3Service } from '../services/phase3DataService';
-import { DbStudent, EnrollmentWithDetails, DbGuardian } from '../types';
+import { DbStudent, EnrollmentWithDetails, DbGuardian } from '../types/index';
 
 interface MmsParentDashboardProps {
   onNavigateMms: (route: string) => void;

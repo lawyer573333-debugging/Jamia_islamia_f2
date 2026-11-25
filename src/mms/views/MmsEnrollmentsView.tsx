@@ -23,7 +23,7 @@ import {
   EnrollmentStatus,
   DbStudent,
   DbClass,
-} from '../types';
+} from '../types/index';
 
 interface MmsEnrollmentsViewProps {
   onNavigateMms: (route: string) => void;

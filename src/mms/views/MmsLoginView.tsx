@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useMmsAuth } from '../context/MmsAuthContext';
+import { isDemoModeAllowed } from '../lib/supabase';
 import { DEMO_CREDENTIALS } from '../data/mockData';
 import { MmsRole, InstitutionalPosition } from '../types/index';
 
@@ -51,7 +52,11 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
   const [showSqlModal, setShowSqlModal] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
 
+  const isDemoUiEnabled = !isConfigured && isDemoModeAllowed;
+
   const handleSelectPreset = (presetKey: string) => {
+    if (!isDemoUiEnabled) return;
+
     setSelectedPreset(presetKey);
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -73,6 +78,8 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
   };
 
   const handleRoleSelect = (role: MmsRole) => {
+    if (!isDemoUiEnabled) return;
+
     setSelectedRole(role);
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -279,16 +286,7 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
                 </button>
               </div>
 
-              {isConfigured ? (
-                <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100 text-[11px] leading-relaxed">
-                  <p>
-                    {t(
-                      'براہ کرم اپنی ای میل اور پاس ورڈ درج کریں جو انتظامیہ نے فراہم کیا ہو۔',
-                      "Please enter the credentials provided to you by the institution's administration."
-                    )}
-                  </p>
-                </div>
-              ) : (
+              {isDemoUiEnabled ? (
                 <>
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
                     <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
@@ -313,6 +311,20 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
                     <span className="text-amber-300 font-bold">Demo@123</span>
                   </p>
                 </>
+              ) : (
+                <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100 text-[11px] leading-relaxed">
+                  <p>
+                    {isConfigured
+                      ? t(
+                          'براہ کرم اپنی ای میل اور پاس ورڈ درج کریں جو انتظامیہ نے فراہم کیا ہو۔',
+                          "Please enter the credentials provided to you by the institution's administration."
+                        )
+                      : t(
+                          'سپابیس اتھنٹیکیشن کنفیگر نہیں ہے اور ڈیمو موڈ غیر فعال ہے۔ براہ کرم ڈیٹا بیس گائیڈ کے مطابق سپابیس سیٹ اپ مکمل کریں۔',
+                          'Supabase authentication is not configured and demo mode is disabled. Please complete Supabase setup using the SQL Guide.'
+                        )}
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -365,42 +377,44 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
 
             {/* Quick Presets for Institutional Authority testing */}
             {authMode === 'signin' ? (
-              <div className="mb-5">
-                <label className="block text-xs font-semibold text-stone-700 mb-2">
-                  {t('ادارہ جاتی منصب و کردار کا انتخاب (Institutional Presets):', 'Select Institutional Authority Preset:')}
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {[
-                    { key: 'muhtamim', labelUr: 'مہتممِ جامعہ', labelEn: 'Muhtamim', subUr: 'معائنہ و نگرانی', subEn: 'Oversight' },
-                    { key: 'nazim_aala', labelUr: 'ناظمِ اعلیٰ', labelEn: 'Nazim-e-Aala', subUr: 'چیف ایگزیکٹو', subEn: 'Chief Admin' },
-                    { key: 'departmental_nazim', labelUr: 'ناظمِ تعلیمات', labelEn: 'Academic Head', subUr: 'شعبہ تعلیمات', subEn: 'Academic Dept' },
-                    { key: 'teacher', labelUr: 'استاذِ جامعہ', labelEn: 'Teacher', subUr: 'کلاسز و حاضری', subEn: 'Faculty' },
-                    { key: 'counter', labelUr: 'کاؤنٹر کلرک', labelEn: 'Fee Counter', subUr: 'مالیات و کیش', subEn: 'Cashier' },
-                    { key: 'parent', labelUr: 'سرپرست طالب علم', labelEn: 'Parent', subUr: 'بچوں کا ریکارڈ', subEn: 'Guardian' },
-                  ].map((p) => {
-                    const isSelected = selectedPreset === p.key;
-                    return (
-                      <button
-                        key={p.key}
-                        type="button"
-                        onClick={() => handleSelectPreset(p.key)}
-                        className={`px-2.5 py-2 rounded-xl text-start border text-xs font-semibold transition-all ${
-                          isSelected
-                            ? 'border-emerald-800 bg-emerald-50 text-emerald-900 shadow-xs ring-2 ring-emerald-700/20'
-                            : 'border-stone-200 hover:border-stone-300 bg-stone-50/70 text-stone-700'
-                        }`}
-                      >
-                        <div className="font-bold truncate text-[11px]">
-                          {t(p.labelUr, p.labelEn)}
-                        </div>
-                        <div className="text-[10px] text-stone-500 truncate mt-0.5">
-                          {t(p.subUr, p.subEn)}
-                        </div>
-                      </button>
-                    );
-                  })}
+              isDemoUiEnabled && (
+                <div className="mb-5">
+                  <label className="block text-xs font-semibold text-stone-700 mb-2">
+                    {t('ادارہ جاتی منصب و کردار کا انتخاب (Institutional Presets):', 'Select Institutional Authority Preset:')}
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {[
+                      { key: 'muhtamim', labelUr: 'مہتممِ جامعہ', labelEn: 'Muhtamim', subUr: 'معائنہ و نگرانی', subEn: 'Oversight' },
+                      { key: 'nazim_aala', labelUr: 'ناظمِ اعلیٰ', labelEn: 'Nazim-e-Aala', subUr: 'چیف ایگزیکٹو', subEn: 'Chief Admin' },
+                      { key: 'departmental_nazim', labelUr: 'ناظمِ تعلیمات', labelEn: 'Academic Head', subUr: 'شعبہ تعلیمات', subEn: 'Academic Dept' },
+                      { key: 'teacher', labelUr: 'استاذِ جامعہ', labelEn: 'Teacher', subUr: 'کلاسز و حاضری', subEn: 'Faculty' },
+                      { key: 'counter', labelUr: 'کاؤنٹر کلرک', labelEn: 'Fee Counter', subUr: 'مالیات و کیش', subEn: 'Cashier' },
+                      { key: 'parent', labelUr: 'سرپرست طالب علم', labelEn: 'Parent', subUr: 'بچوں کا ریکارڈ', subEn: 'Guardian' },
+                    ].map((p) => {
+                      const isSelected = selectedPreset === p.key;
+                      return (
+                        <button
+                          key={p.key}
+                          type="button"
+                          onClick={() => handleSelectPreset(p.key)}
+                          className={`px-2.5 py-2 rounded-xl text-start border text-xs font-semibold transition-all ${
+                            isSelected
+                              ? 'border-emerald-800 bg-emerald-50 text-emerald-900 shadow-xs ring-2 ring-emerald-700/20'
+                              : 'border-stone-200 hover:border-stone-300 bg-stone-50/70 text-stone-700'
+                          }`}
+                        >
+                          <div className="font-bold truncate text-[11px]">
+                            {t(p.labelUr, p.labelEn)}
+                          </div>
+                          <div className="text-[10px] text-stone-500 truncate mt-0.5">
+                            {t(p.subUr, p.subEn)}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )
             ) : (
               <div className="mb-5 p-3 rounded-xl bg-amber-50/80 border border-amber-200/80 text-amber-950 text-xs">
                 <div className="flex items-center gap-1.5 font-bold text-amber-900 mb-1">

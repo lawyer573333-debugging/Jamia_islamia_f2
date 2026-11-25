@@ -37,8 +37,8 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
   const [authMode, setAuthMode] = useState<'signin' | 'register'>('signin');
 
   // Form states
-  const [email, setEmail] = useState('nazimaala@demo.local');
-  const [password, setPassword] = useState('Demo@123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('Maulana Muhammad Abdul Rehman');
   const [nameUrdu, setNameUrdu] = useState('مولانا محمد عبد الرحمٰن');
   const [selectedRole, setSelectedRole] = useState<MmsRole>('mudeer');
@@ -279,28 +279,41 @@ export const MmsLoginView: React.FC<MmsLoginViewProps> = ({
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-[11px]">
-                <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
-                  <p className="font-bold text-amber-300">{t('مہتمم (معائنہ و نگرانی)', 'Muhtamim (Inspection)')}</p>
-                  <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">muhtamim@demo.local</p>
+              {isConfigured ? (
+                <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100 text-[11px] leading-relaxed">
+                  <p>
+                    {t(
+                      'براہ کرم اپنی ای میل اور پاس ورڈ درج کریں جو انتظامیہ نے فراہم کیا ہو۔',
+                      "Please enter the credentials provided to you by the institution's administration."
+                    )}
+                  </p>
                 </div>
-                <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
-                  <p className="font-bold text-amber-300">{t('ناظمِ اعلیٰ (چیف ایگزیکٹو)', 'Nazim-e-Aala (Operations)')}</p>
-                  <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">nazimaala@demo.local</p>
-                </div>
-                <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
-                  <p className="font-bold text-amber-300">{t('ناظمِ تعلیمات (تعلیمی شعبہ)', 'Academic Manager')}</p>
-                  <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">nazimtaleemat@demo.local</p>
-                </div>
-                <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
-                  <p className="font-bold text-amber-300">{t('اساتذہ و کاؤنٹر و اولیاء', 'Teachers / Staff / Parents')}</p>
-                  <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">teacher@demo.local</p>
-                </div>
-              </div>
-              <p className="text-[10px] text-emerald-300/80 mt-2 font-mono">
-                {t('تجرباتی پاس ورڈ:', 'Default Test Password:')}{' '}
-                <span className="text-amber-300 font-bold">Demo@123</span>
-              </p>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
+                      <p className="font-bold text-amber-300">{t('مہتمم (معائنہ و نگرانی)', 'Muhtamim (Inspection)')}</p>
+                      <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">muhtamim@demo.local</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
+                      <p className="font-bold text-amber-300">{t('ناظمِ اعلیٰ (چیف ایگزیکٹو)', 'Nazim-e-Aala (Operations)')}</p>
+                      <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">nazimaala@demo.local</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
+                      <p className="font-bold text-amber-300">{t('ناظمِ تعلیمات (تعلیمی شعبہ)', 'Academic Manager')}</p>
+                      <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">nazimtaleemat@demo.local</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-100">
+                      <p className="font-bold text-amber-300">{t('اساتذہ و کاؤنٹر و اولیاء', 'Teachers / Staff / Parents')}</p>
+                      <p className="text-[10px] text-stone-300 mt-0.5 font-mono truncate">teacher@demo.local</p>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-emerald-300/80 mt-2 font-mono">
+                    {t('تجرباتی پاس ورڈ:', 'Default Test Password:')}{' '}
+                    <span className="text-amber-300 font-bold">Demo@123</span>
+                  </p>
+                </>
+              )}
             </div>
           </div>
 

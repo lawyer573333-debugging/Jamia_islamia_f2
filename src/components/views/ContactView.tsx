@@ -10,7 +10,9 @@ import {
   Building,
   Navigation,
   MessageSquare,
+  Loader2,
 } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 import { useLanguage } from '../../context/LanguageContext';
 import { contactData } from '../../data/contact';
 import { VerificationBadge } from '../VerificationBadge';
@@ -22,6 +24,8 @@ interface ContactViewProps {
 export const ContactView: React.FC<ContactViewProps> = ({ onNavigate }) => {
   const { language, isRtl, t } = useLanguage();
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -30,9 +34,30 @@ export const ContactView: React.FC<ContactViewProps> = ({ onNavigate }) => {
     message: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormSubmitted(true);
+    setIsSubmitting(true);
+    setFormError(false);
+
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        {
+          from_name: formData.name,
+          from_phone: formData.phone,
+          from_email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      );
+      setFormSubmitted(true);
+    } catch {
+      setFormError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -256,12 +281,37 @@ export const ContactView: React.FC<ContactViewProps> = ({ onNavigate }) => {
                 />
               </div>
 
+              {formError && (
+                <div
+                  role="alert"
+                  className="p-3.5 rounded-lg bg-red-50 border border-red-200 text-red-800 flex items-start gap-2.5 text-xs sm:text-sm"
+                >
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                  <span>
+                    {t(
+                      'پیغام نہیں بھیجا جا سکا۔ براہ کرم دوبارہ کوشش کریں یا فون پر رابطہ کریں۔',
+                      'Message could not be sent. Please try again or contact us by phone.'
+                    )}
+                  </span>
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full py-3 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full py-3 rounded-lg bg-emerald-800 hover:bg-emerald-700 disabled:bg-emerald-800/60 disabled:cursor-not-allowed text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2"
               >
-                <Send className="w-4 h-4" />
-                <span>{t('پیغام ارسال کریں', 'Send Message')}</span>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>{t('بھیجا جا رہا ہے...', 'Sending...')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>{t('پیغام ارسال کریں', 'Send Message')}</span>
+                  </>
+                )}
               </button>
             </form>
           )}

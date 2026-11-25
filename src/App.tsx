@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { LanguageProvider } from './context/LanguageContext';
 import { MmsAuthProvider } from './mms/context/MmsAuthContext';
-import { MmsApp } from './mms/MmsApp';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 
-// Views
-import { HomeView } from './components/views/HomeView';
-import { AboutView } from './components/views/AboutView';
-import { DepartmentsView } from './components/views/DepartmentsView';
-import { DarsNizamiView } from './components/views/DarsNizamiView';
-import { QuranEducationView } from './components/views/QuranEducationView';
-import { ContemporaryEducationView } from './components/views/ContemporaryEducationView';
-import { AdmissionsView } from './components/views/AdmissionsView';
-import { FacultyView } from './components/views/FacultyView';
-import { AnnouncementsView } from './components/views/AnnouncementsView';
-import { EventsView } from './components/views/EventsView';
-import { GalleryView } from './components/views/GalleryView';
-import { MediaView } from './components/views/MediaView';
-import { DocumentsView } from './components/views/DocumentsView';
-import { ContactView } from './components/views/ContactView';
-import { SetupGuideView } from './components/views/SetupGuideView';
+// Lazy-loaded Views
+const HomeView = React.lazy(() => import('./components/views/HomeView').then(m => ({ default: m.HomeView })));
+const AboutView = React.lazy(() => import('./components/views/AboutView').then(m => ({ default: m.AboutView })));
+const DepartmentsView = React.lazy(() => import('./components/views/DepartmentsView').then(m => ({ default: m.DepartmentsView })));
+const DarsNizamiView = React.lazy(() => import('./components/views/DarsNizamiView').then(m => ({ default: m.DarsNizamiView })));
+const QuranEducationView = React.lazy(() => import('./components/views/QuranEducationView').then(m => ({ default: m.QuranEducationView })));
+const ContemporaryEducationView = React.lazy(() => import('./components/views/ContemporaryEducationView').then(m => ({ default: m.ContemporaryEducationView })));
+const AdmissionsView = React.lazy(() => import('./components/views/AdmissionsView').then(m => ({ default: m.AdmissionsView })));
+const FacultyView = React.lazy(() => import('./components/views/FacultyView').then(m => ({ default: m.FacultyView })));
+const AnnouncementsView = React.lazy(() => import('./components/views/AnnouncementsView').then(m => ({ default: m.AnnouncementsView })));
+const EventsView = React.lazy(() => import('./components/views/EventsView').then(m => ({ default: m.EventsView })));
+const GalleryView = React.lazy(() => import('./components/views/GalleryView').then(m => ({ default: m.GalleryView })));
+const MediaView = React.lazy(() => import('./components/views/MediaView').then(m => ({ default: m.MediaView })));
+const DocumentsView = React.lazy(() => import('./components/views/DocumentsView').then(m => ({ default: m.DocumentsView })));
+const ContactView = React.lazy(() => import('./components/views/ContactView').then(m => ({ default: m.ContactView })));
+const SetupGuideView = React.lazy(() => import('./components/views/SetupGuideView').then(m => ({ default: m.SetupGuideView })));
+const MmsApp = React.lazy(() => import('./mms/MmsApp').then(m => ({ default: m.MmsApp })));
 
 export default function App() {
   const [currentView, setCurrentView] = useState<string>('home');
@@ -90,12 +90,16 @@ export default function App() {
     <LanguageProvider>
       <MmsAuthProvider>
         {isMmsRoute ? (
-          <MmsApp currentView={currentView} onNavigate={handleNavigate} />
+          <React.Suspense fallback={<div className="flex-1 flex items-center justify-center min-h-[60vh] text-stone-400 text-sm">لوڈ ہو رہا ہے... / Loading...</div>}>
+            <MmsApp currentView={currentView} onNavigate={handleNavigate} />
+          </React.Suspense>
         ) : (
           <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900 antialiased selection:bg-amber-200 selection:text-stone-900">
             <Header currentView={currentView} onNavigate={handleNavigate} />
             <main className="flex-1">
-              {renderView()}
+              <React.Suspense fallback={<div className="flex-1 flex items-center justify-center min-h-[60vh] text-stone-400 text-sm">لوڈ ہو رہا ہے... / Loading...</div>}>
+                {renderView()}
+              </React.Suspense>
             </main>
             <Footer onNavigate={handleNavigate} />
           </div>

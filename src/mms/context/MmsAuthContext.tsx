@@ -263,6 +263,14 @@ export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return;
       }
 
+      if (!isSupabaseConfigured) {
+        setUser(null);
+        setProfile(null);
+        setRole(null);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         if (error) {
@@ -449,6 +457,13 @@ export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setProfile(mockProfile);
       setRole(demoRole);
       return { success: true, role: demoRole, position: demoPosition };
+    }
+
+    if (!isSupabaseConfigured) {
+      return {
+        success: false,
+        error: 'سپابیس (Supabase) کنفیگر نہیں ہے اور ڈیمو موڈ غیر فعال ہے۔ براہ کرم Supabase کی ترتیبات مکمل کریں۔ (Supabase is not configured and demo mode is disabled.)',
+      };
     }
 
     try {

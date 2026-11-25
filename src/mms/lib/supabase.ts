@@ -12,9 +12,11 @@ export const isSupabaseConfigured = Boolean(
   !supabaseUrl.includes('YOUR_PROJECT_URL')
 );
 
-// Demo mode is ONLY allowed when explicitly enabled.
-// In production, set VITE_DEMO_MODE=false (or leave unset) to prevent insecure fallback.
-export const isDemoModeAllowed = import.meta.env.VITE_DEMO_MODE === 'true';
+// Demo mode is ONLY allowed during local development (import.meta.env.DEV)
+// AND when VITE_DEMO_MODE is explicitly set to 'true'.
+// Production builds always evaluate import.meta.env.DEV as false, preventing insecure fallback.
+export const isDemoModeAllowed =
+  import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true';
 
 if (!isSupabaseConfigured) {
   console.warn(

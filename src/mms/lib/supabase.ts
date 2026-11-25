@@ -12,6 +12,10 @@ export const isSupabaseConfigured = Boolean(
   !supabaseUrl.includes('YOUR_PROJECT_URL')
 );
 
+// Demo mode is ONLY allowed when explicitly enabled.
+// In production, set VITE_DEMO_MODE=false (or leave unset) to prevent insecure fallback.
+export const isDemoModeAllowed = import.meta.env.VITE_DEMO_MODE === 'true';
+
 if (!isSupabaseConfigured) {
   console.warn(
     '[MMS Supabase] VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY is not configured. Please set them in .env.local.'

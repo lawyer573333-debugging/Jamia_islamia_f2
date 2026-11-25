@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { MmsUser, MmsRole, InstitutionalPosition, SupabaseProfile } from '../types';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, isDemoModeAllowed } from '../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
 export interface MmsAuthContextType {
@@ -244,7 +244,7 @@ export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ child
     let isMounted = true;
 
     const initAuth = async () => {
-      if (!isSupabaseConfigured) {
+      if (!isSupabaseConfigured && isDemoModeAllowed) {
         try {
           const stored = localStorage.getItem('jamia_demo_auth_user');
           if (stored) {
@@ -320,7 +320,7 @@ export const MmsAuthProvider: React.FC<{ children: React.ReactNode }> = ({ child
     email: string,
     password: string
   ): Promise<{ success: boolean; error?: string; role?: MmsRole; position?: InstitutionalPosition }> => {
-    if (!isSupabaseConfigured) {
+    if (!isSupabaseConfigured && isDemoModeAllowed) {
       const trimmedEmail = email.trim().toLowerCase();
       let demoRole: MmsRole = 'parent';
       let demoPosition: InstitutionalPosition = 'parent';

@@ -24,6 +24,7 @@ import {
 
 // Storage key for persistent demo mode data
 const STORAGE_KEY = 'jamia_mms_phase3_store';
+const PAGE_SIZE = 50;
 
 // ============================================================================
 // Realistic Seed Data for Jamia Tul Uloom Al-Islamia, Mirpur AJK
@@ -805,7 +806,7 @@ export const phase3Service = {
 
     if (isSupabaseConfigured) {
       try {
-        let query = supabase.from('students').select('*').order('created_at', { ascending: false });
+        let query = supabase.from('students').select('*').order('created_at', { ascending: false }).range(0, PAGE_SIZE - 1);
         if (filters?.status && filters.status !== 'all') {
           query = query.eq('status', filters.status);
         }
@@ -1042,7 +1043,7 @@ export const phase3Service = {
 
     if (isSupabaseConfigured) {
       try {
-        const { data, error } = await supabase.from('guardians').select('*').order('full_name');
+        const { data, error } = await supabase.from('guardians').select('*').order('full_name').range(0, PAGE_SIZE - 1);
         if (!error && data && data.length > 0) {
           list = data as DbGuardian[];
         }
@@ -1272,7 +1273,7 @@ export const phase3Service = {
 
     if (isSupabaseConfigured) {
       try {
-        const { data, error } = await supabase.from('teachers').select('*').order('employee_number');
+        const { data, error } = await supabase.from('teachers').select('*').order('employee_number').range(0, PAGE_SIZE - 1);
         if (!error && data && data.length > 0) {
           list = data as DbTeacher[];
         }
@@ -1474,7 +1475,7 @@ export const phase3Service = {
 
     if (isSupabaseConfigured) {
       try {
-        const { data, error } = await supabase.from('classes').select('*').order('code');
+        const { data, error } = await supabase.from('classes').select('*').order('code').range(0, 99);
         if (!error && data && data.length > 0) {
           list = data as DbClass[];
         }
@@ -1709,7 +1710,7 @@ export const phase3Service = {
 
     if (isSupabaseConfigured) {
       try {
-        const { data, error } = await supabase.from('subjects').select('*').order('code');
+        const { data, error } = await supabase.from('subjects').select('*').order('code').range(0, 99);
         if (!error && data && data.length > 0) {
           list = data as DbSubject[];
         }
@@ -1959,7 +1960,7 @@ export const phase3Service = {
 
     if (isSupabaseConfigured) {
       try {
-        let query = supabase.from('enrollments').select('*').order('enrollment_date', { ascending: false });
+        let query = supabase.from('enrollments').select('*').order('enrollment_date', { ascending: false }).range(0, PAGE_SIZE - 1);
         if (sId) query = query.eq('student_id', sId);
         if (cId) query = query.eq('class_id', cId);
         if (filters?.status && filters.status !== 'all') query = query.eq('status', filters.status);
@@ -2173,7 +2174,7 @@ export const phase3Service = {
     const store = loadLocalStore();
     if (isSupabaseConfigured) {
       try {
-        const { data, error } = await supabase.from('student_guardians').select('*');
+        const { data, error } = await supabase.from('student_guardians').select('*').range(0, 199);
         if (!error && data && data.length > 0) {
           return data as DbStudentGuardian[];
         }

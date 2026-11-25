@@ -60,6 +60,9 @@ export const ImagePlaceholder: React.FC<ImagePlaceholderProps> = ({
           className={`w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-105 ${className}`}
           referrerPolicy="no-referrer"
           loading="lazy"
+          decoding="async"
+          width="800"
+          height="450"
           onError={() => setHasError(true)}
         />
         {/* Subtle institutional verified indicator */}
